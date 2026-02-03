@@ -1,0 +1,74 @@
+import { spawn, type ChildProcess } from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+
+import { ensureDir } from "../util/fs";
+import type { TailBuffer } from "../util/net";
+
+export function spawnGateway(params: {
+  port: number;
+  logsDir: string;
+  stateDir: string;
+  configPath: string;
+  token: string;
+  openclawDir: string;
+  nodeBin: string;
+  gogBin?: string;
+  stderrTail: TailBuffer;
+}): ChildProcess {
+  const { port, logsDir, stateDir, configPath, token, openclawDir, nodeBin, gogBin, stderrTail } = params;
+
+  ensureDir(logsDir);
+  ensureDir(stateDir);
+
+  const stdoutPath = path.join(logsDir, "gateway.stdout.log");
+  const stderrPath = path.join(logsDir, "gateway.stderr.log");
+  const stdout = fs.createWriteStream(stdoutPath, { flags: "a" });
+  const stderr = fs.createWriteStream(stderrPath, { flags: "a" });
+
+  const script = path.join(openclawDir, "openclaw.mjs");
+  // Important: first-run embedded app starts without a config file. Allow the Gateway to start
+  // so the Control UI/WebChat + wizard flows can create config.
+  const args = [script, "gateway", "--bind", "loopback", "--port", String(port), "--allow-unconfigured"];
+
+  const envPath = typeof process.env.PATH === "string" ? process.env.PATH : "";
+  const extraBinDir = gogBin ? path.dirname(gogBin) : "";
+  const mergedPath = extraBinDir ? `${extraBinDir}:${envPath}` : envPath;
+
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+    // In dev mode we spawn the Gateway using the Electron binary (process.execPath). That binary
+    // must run in "Node mode" for the child process, otherwise it tries to launch Electron again.
+    ELECTRON_RUN_AS_NODE: "1",
+    // Keep all OpenClaw state inside the Electron app's userData directory.
+    OPENCLAW_STATE_DIR: stateDir,
+    OPENCLAW_CONFIG_PATH: configPath,
+    OPENCLAW_GATEWAY_PORT: String(port),
+    OPENCLAW_GATEWAY_TOKEN: token,
+    // Ensure the embedded Gateway resolves the bundled gog binary via PATH.
+    PATH: mergedPath,
+    // Reduce noise in embedded contexts.
+    NO_COLOR: "1",
+    FORCE_COLOR: "0",
+  };
+
+  const child = spawn(nodeBin, args, {
+    cwd: openclawDir,
+    env,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  child.stderr.on("data", (chunk) => {
+    try {
+      stderrTail.push(String(chunk));
+    } catch {
+      // ignore
+    }
+  });
+
+  child.stdout.pipe(stdout);
+  child.stderr.pipe(stderr);
+
+  return child;
+}
+
