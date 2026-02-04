@@ -1213,7 +1213,17 @@ pre {
 .UiApiKeyCard {
   display: flex;
   flex-direction: column;
-  min-height: 420px;
+  min-height: 520px;
+}
+
+.UiProviderCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+}
+
+.UiProviderCard .UiProviderList {
+  flex: 1;
 }
 
 .UiApiKeyTitle {
