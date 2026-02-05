@@ -102,6 +102,20 @@ async function downloadToFile(url, destPath) {
   if (typeof fetch !== "function") {
     throw new Error("global fetch() not available; please run this script with Node 18+");
   }
+
+  // Treat an existing non-empty destination as a cache hit.
+  // This avoids flaky rebuilds when the cache dir already contains the asset.
+  if (fs.existsSync(destPath)) {
+    try {
+      const st = fs.statSync(destPath);
+      if (st.isFile() && st.size > 0 && String(process.env.GOGCLI_FORCE_DOWNLOAD || "").trim() !== "1") {
+        return;
+      }
+    } catch {
+      // Ignore stat errors and continue with a download attempt.
+    }
+  }
+
   const res = await fetch(url, {
     headers: {
       "User-Agent": "openclaw-electron-desktop/fetch-gog-runtime",
@@ -113,6 +127,11 @@ async function downloadToFile(url, destPath) {
   }
   ensureDir(path.dirname(destPath));
   const tmpPath = `${destPath}.tmp`;
+  try {
+    fs.rmSync(tmpPath, { force: true });
+  } catch {
+    // ignore
+  }
   try {
     const body = res.body;
     if (!body) {

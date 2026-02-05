@@ -13,13 +13,14 @@ import { useWelcomeModels } from "./useWelcomeModels";
 import { useWelcomeNotion } from "./useWelcomeNotion";
 import { useWelcomeTelegram } from "./useWelcomeTelegram";
 import { useWelcomeWebSearch, type WebSearchProvider } from "./useWelcomeWebSearch";
+import { getObject } from "./utils";
 
 type WelcomeStateInput = {
   state: Extract<GatewayState, { kind: "ready" }>;
   navigate: NavigateFunction;
 };
 
-type SkillId = "google-workspace" | "web-search" | "notion";
+type SkillId = "google-workspace" | "media-understanding" | "web-search" | "notion";
 type SkillStatus = "connect" | "connected";
 
 export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
@@ -34,8 +35,11 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
   const [apiKeyBusy, setApiKeyBusy] = React.useState(false);
   const [notionBusy, setNotionBusy] = React.useState(false);
   const [webSearchBusy, setWebSearchBusy] = React.useState(false);
+  const [mediaUnderstandingBusy, setMediaUnderstandingBusy] = React.useState(false);
+  const [hasOpenAiProvider, setHasOpenAiProvider] = React.useState(false);
   const [skills, setSkills] = React.useState<Record<SkillId, SkillStatus>>({
     "google-workspace": "connect",
+    "media-understanding": "connect",
     "web-search": "connect",
     notion: "connect",
   });
@@ -90,6 +94,13 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
   const goApiKey = React.useCallback(() => navigate(`${routes.welcome}/api-key`), [navigate]);
   const goModelSelect = React.useCallback(() => navigate(`${routes.welcome}/model-select`), [navigate]);
   const goWebSearch = React.useCallback(() => navigate(`${routes.welcome}/web-search`), [navigate]);
+  const goMediaUnderstanding = React.useCallback(
+    () => {
+      void refreshProviderFlags();
+      navigate(`${routes.welcome}/media-understanding`);
+    },
+    [navigate],
+  );
   const goSkills = React.useCallback(() => navigate(`${routes.welcome}/skills`), [navigate]);
   const goNotion = React.useCallback(() => navigate(`${routes.welcome}/notion`), [navigate]);
   const goTelegramToken = React.useCallback(() => navigate(`${routes.welcome}/telegram-token`), [navigate]);
@@ -151,6 +162,25 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
     [saveDefaultModel, goSkills],
   );
 
+  const refreshProviderFlags = React.useCallback(async () => {
+    try {
+      const snap = await loadConfig();
+      const cfg = getObject(snap.config);
+      const auth = getObject(cfg.auth);
+      const profiles = getObject(auth.profiles);
+      const order = getObject(auth.order);
+      const hasProfile = Object.values(profiles).some((p) => {
+        if (!p || typeof p !== "object" || Array.isArray(p)) return false;
+        return (p as { provider?: unknown }).provider === "openai";
+      });
+      const hasOrder = Object.prototype.hasOwnProperty.call(order, "openai");
+      setHasOpenAiProvider(Boolean(hasProfile || hasOrder));
+    } catch {
+      // Best-effort; keep false on failures.
+      setHasOpenAiProvider(false);
+    }
+  }, [loadConfig]);
+
   const onWebSearchSubmit = React.useCallback(
     async (provider: WebSearchProvider, apiKey: string) => {
       setWebSearchBusy(true);
@@ -170,6 +200,67 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
       }
     },
     [goSkills, markSkillConnected, saveWebSearch],
+  );
+
+  const onMediaUnderstandingSubmit = React.useCallback(
+    async (settings: { image: boolean; audio: boolean }) => {
+      setMediaUnderstandingBusy(true);
+      setError(null);
+      setStatus("Saving media understanding settings…");
+      try {
+        const snap = await loadConfig();
+        const baseHash = typeof snap.hash === "string" && snap.hash.trim() ? snap.hash.trim() : null;
+        if (!baseHash) {
+          throw new Error("Config base hash missing. Reload and try again.");
+        }
+        await gw.request("config.patch", {
+          baseHash,
+          raw: JSON.stringify(
+            {
+              tools: {
+                media: {
+                  image: { enabled: settings.image },
+                  audio: { enabled: settings.audio },
+                  video: { enabled: false },
+                },
+              },
+            },
+            null,
+            2,
+          ),
+          note: "Welcome: configure media understanding",
+        });
+        markSkillConnected("media-understanding");
+        setStatus("Media understanding enabled.");
+        goSkills();
+      } catch (err) {
+        setError(String(err));
+        setStatus(null);
+      } finally {
+        setMediaUnderstandingBusy(false);
+      }
+    },
+    [goSkills, gw, loadConfig, markSkillConnected, setError, setStatus],
+  );
+
+  const mediaProvidersDetected = React.useMemo(() => {
+    const providers = new Set((models ?? []).map((m) => m.provider).filter(Boolean));
+    const image = ["openai", "google", "anthropic", "minimax"].filter((p) => providers.has(p));
+    const audio = ["openai", "google", "groq"].filter((p) => providers.has(p));
+    return { image, audio };
+  }, [models]);
+
+  const onMediaProviderKeySubmit = React.useCallback(
+    async (provider: "openai", apiKey: string) => {
+      // Save an additional provider key without re-running model selection flow.
+      const ok = await saveApiKey(provider, apiKey);
+      if (ok) {
+        await loadModels();
+        await refreshProviderFlags();
+      }
+      return ok;
+    },
+    [loadModels, refreshProviderFlags, saveApiKey],
   );
 
   const onNotionApiKeySubmit = React.useCallback(
@@ -231,6 +322,7 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
     goGog,
     goGogGoogleWorkspace,
     goModelSelect,
+    goMediaUnderstanding,
     goWebSearch,
     goNotion,
     goProviderSelect,
@@ -246,6 +338,10 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
     models,
     modelsError,
     modelsLoading,
+    mediaUnderstandingBusy,
+    hasOpenAiProvider,
+    onMediaUnderstandingSubmit,
+    onMediaProviderKeySubmit,
     notionBusy,
     onWebSearchSubmit,
     onNotionApiKeySubmit,

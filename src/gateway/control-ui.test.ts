@@ -41,4 +41,24 @@ describe("handleControlUiHttpRequest", () => {
       await fs.rm(tmp, { recursive: true, force: true });
     }
   });
+
+  it("allows embedding when embed=1 is present", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-"));
+    try {
+      await fs.writeFile(path.join(tmp, "index.html"), "<html></html>\n");
+      const { res, setHeader } = makeResponse();
+      const handled = handleControlUiHttpRequest(
+        { url: "/?embed=1", method: "GET" } as IncomingMessage,
+        res,
+        {
+          root: { kind: "resolved", path: tmp },
+        },
+      );
+      expect(handled).toBe(true);
+      expect(setHeader).not.toHaveBeenCalledWith("X-Frame-Options", "DENY");
+      expect(setHeader).toHaveBeenCalledWith("Content-Security-Policy", "frame-ancestors file:");
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
 });

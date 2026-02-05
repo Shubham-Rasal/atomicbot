@@ -13,14 +13,6 @@ function run(cmd, args, opts = {}) {
   return String(res.stdout || "");
 }
 
-function fileSizeBytes(p) {
-  try {
-    return fs.statSync(p).size;
-  } catch {
-    return 0;
-  }
-}
-
 function listDirSafe(p) {
   try {
     return fs.readdirSync(p, { withFileTypes: true });
@@ -53,10 +45,26 @@ function repoRootFromHere() {
   return path.resolve(__dirname, "..", "..", "..");
 }
 
+function appRootFromHere() {
+  // apps/electron-desktop/scripts -> apps/electron-desktop
+  return path.resolve(__dirname, "..");
+}
+
+function readElectronDesktopPackageJson() {
+  const appRoot = appRootFromHere();
+  const pkgPath = path.join(appRoot, "package.json");
+  const raw = fs.readFileSync(pkgPath, "utf-8");
+  // Note: this is the app's own package.json, not the repo root.
+  return JSON.parse(raw);
+}
+
 /**
  * electron-builder hook.
  *
- * Goal: notarize + staple the built DMG artifact (recommended for Gatekeeper).
+ * Goal:
+ * - Build a DMG from the signed .app (using macOS built-ins) with enough margin to avoid
+ *   "No space left on device" errors from dmgbuild sizing heuristics.
+ * - Optionally notarize + staple the DMG (recommended for Gatekeeper).
  *
  * This runs only when NOTARIZE=1 is set (to avoid local builds accidentally hitting Apple).
  *
@@ -69,6 +77,48 @@ module.exports = async function afterAllArtifactBuild(context) {
   // (unlike `afterSign`/`afterPack`). Gate on the current runtime + artifact extension.
   if (process.platform !== "darwin") {
     return;
+  }
+
+  const outDir = context.outDir && typeof context.outDir === "string" ? context.outDir : process.cwd();
+  const appOutDirGuess = path.join(outDir, `mac-${process.arch}`);
+  const appOutDir = (context.appOutDir && typeof context.appOutDir === "string" ? context.appOutDir : null) || appOutDirGuess;
+  const appBundle = findFirstAppBundle(appOutDir);
+  if (!appBundle) {
+    throw new Error(`[electron-desktop] afterAllArtifactBuild: app bundle not found in: ${appOutDir}`);
+  }
+
+  // Prefer the app's own package.json for stable artifact naming.
+  // We've observed electron-builder context sometimes reporting version as "0.0.0".
+  const pkg = readElectronDesktopPackageJson();
+  const productName =
+    (pkg && pkg.build && typeof pkg.build.productName === "string" && pkg.build.productName.trim()) || "Atomic Bot";
+  const version = (pkg && typeof pkg.version === "string" && pkg.version.trim()) || "0.0.0";
+
+  const dmgPath = path.join(outDir, `${productName}-${version}-${process.arch}.dmg`);
+  const rebuildScript = path.resolve(__dirname, "build-dmg-from-app.sh");
+  if (!fs.existsSync(rebuildScript)) {
+    throw new Error(`[electron-desktop] afterAllArtifactBuild: DMG build script missing: ${rebuildScript}`);
+  }
+
+  console.log(`[electron-desktop] afterAllArtifactBuild: building DMG from app: ${path.basename(appBundle)}`);
+  run("bash", [rebuildScript, appBundle, dmgPath], {
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      // Keep volume name consistent with prior electron-builder DMGs.
+      DMG_VOLUME_NAME: `${productName} ${version}-${process.arch}`,
+      // Extra headroom for filesystem overhead and symlink.
+      DMG_MARGIN_MB: String(process.env.DMG_MARGIN_MB || "300"),
+    },
+  });
+
+  // If electron-builder previously created a .blockmap for a now-nonexistent DMG, delete it.
+  // We're not using electron-updater yet, so leaving a stale blockmap is more confusing than helpful.
+  const blockmapPath = `${dmgPath}.blockmap`;
+  try {
+    fs.rmSync(blockmapPath, { force: true });
+  } catch {
+    // ignore
   }
 
   const notarizeEnabled = String(process.env.NOTARIZE || "").trim() === "1";
@@ -86,59 +136,13 @@ module.exports = async function afterAllArtifactBuild(context) {
     );
   }
 
-  const artifacts = Array.isArray(context.artifactPaths) ? context.artifactPaths : [];
-  const dmgs = artifacts.filter((p) => typeof p === "string" && p.endsWith(".dmg"));
-
-  if (dmgs.length === 0) {
-    console.log("[electron-desktop] afterAllArtifactBuild: no .dmg artifacts found (skipping)");
-    return;
-  }
-
   const repoRoot = repoRootFromHere();
   const notarizeScript = path.join(repoRoot, "scripts", "notarize-mac-artifact.sh");
   if (!fs.existsSync(notarizeScript)) {
     throw new Error(`[electron-desktop] afterAllArtifactBuild: notarize script not found: ${notarizeScript}`);
   }
 
-  console.log(`[electron-desktop] afterAllArtifactBuild: notarizing ${dmgs.length} DMG artifact(s) …`);
-  for (const dmgPath of dmgs) {
-    const size = fileSizeBytes(dmgPath);
-    // A DMG that contains the app bundle is typically hundreds of MB here. If it is tiny,
-    // it likely ended up missing the .app (we've observed "background-only" DMGs).
-    if (size > 0 && size < 50 * 1024 * 1024) {
-      const outDir = context.outDir && typeof context.outDir === "string" ? context.outDir : path.dirname(dmgPath);
-      const appOutDirGuess = path.join(outDir, `mac-${process.arch}`);
-      const appOutDir =
-        (context.appOutDir && typeof context.appOutDir === "string" ? context.appOutDir : null) || appOutDirGuess;
-      const appBundle = findFirstAppBundle(appOutDir);
-      if (appBundle) {
-        const rebuildScript = path.resolve(__dirname, "build-dmg-from-app.sh");
-        if (!fs.existsSync(rebuildScript)) {
-          throw new Error(`[electron-desktop] afterAllArtifactBuild: rebuild script missing: ${rebuildScript}`);
-        }
-        console.log(
-          `[electron-desktop] afterAllArtifactBuild: DMG looks too small (${size} bytes). Rebuilding from app: ${path.basename(
-            appBundle,
-          )}`,
-        );
-        run("bash", [rebuildScript, appBundle, dmgPath], { stdio: "inherit", env: process.env });
-        // electron-builder generates a .blockmap for the original DMG. Since we rebuilt the DMG,
-        // the blockmap is no longer valid (and we're not using electron-updater yet).
-        const blockmapPath = `${dmgPath}.blockmap`;
-        try {
-          fs.rmSync(blockmapPath, { force: true });
-        } catch {
-          // ignore
-        }
-      } else {
-        console.log(
-          `[electron-desktop] afterAllArtifactBuild: DMG looks too small (${size} bytes) but app bundle not found in: ${appOutDir}`,
-        );
-      }
-    }
-
-    console.log(`[electron-desktop] afterAllArtifactBuild: notarizing DMG: ${dmgPath}`);
-    run("bash", [notarizeScript, dmgPath], { stdio: "inherit", env: process.env });
-  }
+  console.log(`[electron-desktop] afterAllArtifactBuild: notarizing DMG: ${dmgPath}`);
+  run("bash", [notarizeScript, dmgPath], { stdio: "inherit", env: process.env });
 };
 

@@ -127,10 +127,15 @@ export function TextInput(props: {
   autoCapitalize?: string;
   autoCorrect?: string;
   spellCheck?: boolean;
+  className?: string;
+  error?: boolean;
+  inputRef?: React.Ref<HTMLInputElement>;
 }) {
+  const className = `UiInput${props.error ? " UiInput--error" : ""}${props.className ? ` ${props.className}` : ""}`;
   return (
     <input
-      className="UiInput"
+      ref={props.inputRef}
+      className={className}
       type={props.type ?? "text"}
       value={props.value}
       onChange={(e) => props.onChange(e.target.value)}
@@ -139,6 +144,7 @@ export function TextInput(props: {
       autoCapitalize={props.autoCapitalize}
       autoCorrect={props.autoCorrect}
       spellCheck={props.spellCheck}
+      aria-invalid={props.error ? true : undefined}
     />
   );
 }

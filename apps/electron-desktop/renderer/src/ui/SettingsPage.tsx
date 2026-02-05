@@ -151,6 +151,21 @@ export function SettingsPage({ state }: { state: Extract<GatewayState, { kind: "
           ? (agents.defaults as Record<string, unknown>)
           : {};
 
+      const hooks =
+        cfg.hooks && typeof cfg.hooks === "object" && !Array.isArray(cfg.hooks)
+          ? (cfg.hooks as Record<string, unknown>)
+          : {};
+      const hooksInternal =
+        hooks.internal && typeof hooks.internal === "object" && !Array.isArray(hooks.internal)
+          ? (hooks.internal as Record<string, unknown>)
+          : {};
+      const hooksEntries =
+        hooksInternal.entries &&
+        typeof hooksInternal.entries === "object" &&
+        !Array.isArray(hooksInternal.entries)
+          ? (hooksInternal.entries as Record<string, unknown>)
+          : {};
+
       const currentWorkspace =
         typeof agentDefaults.workspace === "string" ? agentDefaults.workspace.trim() : "";
       const workspaceDir = currentWorkspace || inferWorkspaceDirFromConfigPath(snap.path);
@@ -199,6 +214,33 @@ export function SettingsPage({ state }: { state: Extract<GatewayState, { kind: "
             workspace: workspaceDir,
           },
         };
+      }
+
+      // Enable recommended internal hooks by default on first-run config creation.
+      // Only fill missing keys and avoid overriding explicit user choices.
+      const internalEnabled =
+        typeof hooksInternal.enabled === "boolean" ? hooksInternal.enabled : null;
+      const shouldConsiderHooks = internalEnabled !== false;
+      if (shouldConsiderHooks) {
+        const nextEntries: Record<string, unknown> = { ...hooksEntries };
+        if (!("session-memory" in nextEntries)) {
+          nextEntries["session-memory"] = { enabled: true };
+        }
+        if (!("command-logger" in nextEntries)) {
+          nextEntries["command-logger"] = { enabled: true };
+        }
+        const needsInternalEnabled = internalEnabled !== true;
+        const needsEntries = Object.keys(nextEntries).length !== Object.keys(hooksEntries).length;
+        if (needsInternalEnabled || needsEntries) {
+          patch.hooks = {
+            ...hooks,
+            internal: {
+              ...hooksInternal,
+              enabled: internalEnabled === null ? true : hooksInternal.enabled,
+              entries: nextEntries,
+            },
+          };
+        }
       }
 
       // If the file doesn't exist yet, write a seeded config. Otherwise, patch.

@@ -66,9 +66,20 @@ type ControlUiAvatarMeta = {
   avatarUrl: string | null;
 };
 
-function applyControlUiSecurityHeaders(res: ServerResponse) {
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("Content-Security-Policy", "frame-ancestors 'none'");
+type ControlUiSecurityHeadersMode = "deny" | "embed";
+
+function applyControlUiSecurityHeaders(res: ServerResponse, mode: ControlUiSecurityHeadersMode) {
+  // By default, the Control UI must not be frameable to prevent clickjacking in browsers.
+  // The Electron desktop app intentionally embeds the Control UI in an iframe; in that
+  // case we allow framing from `file:` (Electron `loadFile` origin).
+  if (mode === "deny") {
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Content-Security-Policy", "frame-ancestors 'none'");
+  } else {
+    // NOTE: Do not set X-Frame-Options here; it would block framing regardless of CSP.
+    // `file:` is required because the Electron renderer uses `loadFile(...)`.
+    res.setHeader("Content-Security-Policy", "frame-ancestors file:");
+  }
   res.setHeader("X-Content-Type-Options", "nosniff");
 }
 
@@ -106,7 +117,9 @@ export function handleControlUiAvatarRequest(
     return false;
   }
 
-  applyControlUiSecurityHeaders(res);
+  const mode: ControlUiSecurityHeadersMode =
+    url.searchParams.get("embed") === "1" ? "embed" : "deny";
+  applyControlUiSecurityHeaders(res, mode);
 
   const agentIdParts = pathname.slice(pathWithBase.length).split("/").filter(Boolean);
   const agentId = agentIdParts[0] ?? "";
@@ -255,10 +268,12 @@ export function handleControlUiHttpRequest(
   const url = new URL(urlRaw, "http://localhost");
   const basePath = normalizeControlUiBasePath(opts?.basePath);
   const pathname = url.pathname;
+  const mode: ControlUiSecurityHeadersMode =
+    url.searchParams.get("embed") === "1" ? "embed" : "deny";
 
   if (!basePath) {
     if (pathname === "/ui" || pathname.startsWith("/ui/")) {
-      applyControlUiSecurityHeaders(res);
+      applyControlUiSecurityHeaders(res, mode);
       respondNotFound(res);
       return true;
     }
@@ -266,7 +281,7 @@ export function handleControlUiHttpRequest(
 
   if (basePath) {
     if (pathname === basePath) {
-      applyControlUiSecurityHeaders(res);
+      applyControlUiSecurityHeaders(res, mode);
       res.statusCode = 302;
       res.setHeader("Location", `${basePath}/${url.search}`);
       res.end();
@@ -277,7 +292,7 @@ export function handleControlUiHttpRequest(
     }
   }
 
-  applyControlUiSecurityHeaders(res);
+  applyControlUiSecurityHeaders(res, mode);
 
   const rootState = opts?.root;
   if (rootState?.kind === "invalid") {

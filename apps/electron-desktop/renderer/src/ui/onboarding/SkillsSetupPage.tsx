@@ -23,6 +23,14 @@ const SKILLS: SkillEntry[] = [
     iconVariant: "google",
   },
   {
+    id: "media-understanding",
+    name: "Media Understanding",
+    description: "Transcribe voice messages, describe images, and summarize videos you send",
+    status: "connect",
+    iconText: "M",
+    iconVariant: "nano-banana",
+  },
+  {
     id: "web-search",
     name: "Web Search",
     description: "Enable the web_search tool via Brave Search or Perplexity Sonar",
@@ -103,6 +111,8 @@ function SkillCta({ status, onConnect }: { status: SkillStatus; onConnect?: () =
 export function SkillsSetupPage(props: {
   googleWorkspaceStatus: Exclude<SkillStatus, "coming-soon">;
   onGoogleWorkspaceConnect: () => void;
+  mediaUnderstandingStatus: Exclude<SkillStatus, "coming-soon">;
+  onMediaUnderstandingConnect: () => void;
   webSearchStatus: Exclude<SkillStatus, "coming-soon">;
   onWebSearchConnect: () => void;
   notionStatus: Exclude<SkillStatus, "coming-soon">;
@@ -135,6 +145,8 @@ export function SkillsSetupPage(props: {
               const status =
                 skill.id === "google-workspace"
                   ? props.googleWorkspaceStatus
+                  : skill.id === "media-understanding"
+                    ? props.mediaUnderstandingStatus
                   : skill.id === "web-search"
                     ? props.webSearchStatus
                   : skill.id === "notion"
@@ -143,6 +155,8 @@ export function SkillsSetupPage(props: {
               const onConnect =
                 skill.id === "google-workspace"
                   ? props.onGoogleWorkspaceConnect
+                  : skill.id === "media-understanding"
+                    ? props.onMediaUnderstandingConnect
                   : skill.id === "web-search"
                     ? props.onWebSearchConnect
                   : skill.id === "notion"

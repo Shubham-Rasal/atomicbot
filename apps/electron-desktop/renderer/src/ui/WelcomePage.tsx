@@ -7,6 +7,7 @@ import { GlassCard, HeroPageLayout, InlineError, PrimaryButton } from "./kit";
 import { LoadingScreen } from "./LoadingScreen";
 import { ApiKeyPage } from "./onboarding/ApiKeyPage";
 import { GogPage } from "./onboarding/GogPage";
+import { MediaUnderstandingPage } from "./onboarding/MediaUnderstandingPage";
 import { ModelSelectPage } from "./onboarding/ModelSelectPage";
 import { NotionConnectPage } from "./onboarding/NotionConnectPage";
 import { ProviderSelectPage } from "./onboarding/ProviderSelectPage";
@@ -129,11 +130,29 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
       />
 
       <Route
+        path="media-understanding"
+        element={
+          <MediaUnderstandingPage
+            status={welcome.status}
+            error={welcome.error}
+            busy={welcome.mediaUnderstandingBusy}
+            hasOpenAiProvider={welcome.hasOpenAiProvider}
+            onSubmit={(settings) => void welcome.onMediaUnderstandingSubmit(settings)}
+            onAddProviderKey={(provider, apiKey) => welcome.onMediaProviderKeySubmit(provider, apiKey)}
+            onBack={welcome.goSkills}
+            onSkip={welcome.goSkills}
+          />
+        }
+      />
+
+      <Route
         path="skills"
         element={
           <SkillsSetupPage
             googleWorkspaceStatus={welcome.skills["google-workspace"]}
             onGoogleWorkspaceConnect={welcome.goGogGoogleWorkspace}
+            mediaUnderstandingStatus={welcome.skills["media-understanding"]}
+            onMediaUnderstandingConnect={welcome.goMediaUnderstanding}
             webSearchStatus={welcome.skills["web-search"]}
             onWebSearchConnect={welcome.goWebSearch}
             notionStatus={welcome.skills.notion}

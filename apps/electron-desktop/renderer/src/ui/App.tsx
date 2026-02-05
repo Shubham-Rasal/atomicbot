@@ -153,7 +153,9 @@ function LegacyScreen({ state }: { state: Extract<GatewayState, { kind: "ready" 
     // When the gateway Control UI basePath is empty (default), the legacy UI lives at
     // /overview, /chat, ... and /ui/* is explicitly 404'd by the gateway.
     // The legacy UI supports ?token=... (see ui navigation tests).
-    return `${base}overview?token=${token}`;
+    // The desktop app embeds the Control UI in an iframe; ask the gateway to emit
+    // an embedding-friendly `frame-ancestors` policy for this request.
+    return `${base}overview?token=${token}&embed=1`;
   }, [state.url, state.token]);
   return (
     <div className="IframeWrap">

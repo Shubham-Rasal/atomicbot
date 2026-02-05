@@ -18,11 +18,11 @@ function run(cmd, args, opts = {}) {
   }
 }
 
-function rmrf(p) {
-  try {
-    fs.rmSync(p, { recursive: true, force: true });
-  } catch {
-    // ignore
+function rmrfStrict(p) {
+  if (!fs.existsSync(p)) return;
+  fs.rmSync(p, { recursive: true, force: true });
+  if (fs.existsSync(p)) {
+    throw new Error(`[electron-desktop] Failed to remove deploy dir: ${p}`);
   }
 }
 
@@ -35,7 +35,9 @@ function rmrf(p) {
 // NOTE: Requires pnpm on the developer/build machine.
 const PNPM = process.env.PNPM_BIN || "pnpm";
 
-rmrf(outDir);
+// pnpm deploy requires the target directory to NOT exist (or it must be empty).
+// If deletion fails (e.g. permissions), fail fast with a clear error.
+rmrfStrict(outDir);
 fs.mkdirSync(path.dirname(outDir), { recursive: true });
 
 // Build OpenClaw + Control UI (required for the embedded UI).

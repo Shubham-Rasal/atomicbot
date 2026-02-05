@@ -28,6 +28,9 @@ export function useWelcomeConfig({ gw, state, setError, setStatus }: UseWelcomeC
     const gatewayAuth = getObject(gateway.auth);
     const agents = getObject(cfg.agents);
     const defaults = getObject(agents.defaults);
+    const hooks = getObject(cfg.hooks);
+    const hooksInternal = getObject(hooks.internal);
+    const hooksEntries = getObject(hooksInternal.entries);
 
     const currentWorkspace = typeof defaults.workspace === "string" ? defaults.workspace.trim() : "";
     const workspace = currentWorkspace || inferWorkspaceDirFromConfigPath(snap.path);
@@ -67,6 +70,36 @@ export function useWelcomeConfig({ gw, state, setError, setStatus }: UseWelcomeC
           workspace,
         },
       };
+    }
+
+    // Enable recommended internal hooks by default on first-run config creation.
+    // We only fill missing keys and avoid overriding explicit user choices.
+    const internalEnabled =
+      typeof hooksInternal.enabled === "boolean" ? hooksInternal.enabled : null;
+    const shouldConsiderHooks = internalEnabled !== false;
+    if (shouldConsiderHooks) {
+      const nextEntries: Record<string, unknown> = { ...hooksEntries };
+      const ensureEntry = (name: string) => {
+        if (name in nextEntries) {
+          return;
+        }
+        nextEntries[name] = { enabled: true };
+      };
+      ensureEntry("session-memory");
+      ensureEntry("command-logger");
+
+      const needsInternalEnabled = internalEnabled !== true;
+      const needsEntries = Object.keys(nextEntries).length !== Object.keys(hooksEntries).length;
+      if (needsInternalEnabled || needsEntries) {
+        patch.hooks = {
+          ...hooks,
+          internal: {
+            ...hooksInternal,
+            enabled: internalEnabled === null ? true : hooksInternal.enabled,
+            entries: nextEntries,
+          },
+        };
+      }
     }
 
     if (snap.exists === false) {

@@ -1,7 +1,7 @@
 {
   "name": "atomicbot-desktop",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Atomic Bot makes things for you",
   "type": "commonjs",
   "main": "dist/main.js",
@@ -100,7 +100,7 @@
       "icon": "assets/icon.icns",
       "category": "public.app-category.productivity",
       "target": [
-        "dmg"
+        "zip"
       ]
     }
   }
