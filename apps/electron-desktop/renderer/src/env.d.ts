@@ -3,6 +3,14 @@ import type { GatewayState, ResetAndCloseResult } from "../../src/main/types";
 
 export {};
 
+type MemoExecResult = {
+  ok: boolean;
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  resolvedPath: string | null;
+};
+
 declare global {
   interface Window {
     openclawDesktop?: {
@@ -27,6 +35,7 @@ declare global {
         credentialsJson: string;
         filename?: string;
       }) => Promise<GogExecResult>;
+      memoCheck: () => Promise<MemoExecResult>;
       onGatewayState: (cb: (state: GatewayState) => void) => () => void;
     };
   }

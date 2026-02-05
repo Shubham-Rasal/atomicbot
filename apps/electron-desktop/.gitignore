@@ -4,6 +4,7 @@ release/
 vendor/
 .gog-runtime/
 .jq-runtime/
+.memo-runtime/
 .env
 .env.*
 .DS_Store

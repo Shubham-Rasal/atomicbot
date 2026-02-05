@@ -33,6 +33,12 @@ export function resolveBundledJqBin(): string {
   return path.join(process.resourcesPath, "jq", `${platform}-${arch}`, "jq");
 }
 
+export function resolveBundledMemoBin(): string {
+  const platform = process.platform;
+  const arch = process.arch;
+  return path.join(process.resourcesPath, "memo", `${platform}-${arch}`, "memo");
+}
+
 export function resolveDownloadedGogBin(mainDir: string): string {
   const platform = process.platform;
   const arch = process.arch;
@@ -49,6 +55,15 @@ export function resolveDownloadedJqBin(mainDir: string): string {
   // We keep the downloaded jq runtime next to the Electron app sources.
   const appDir = path.resolve(mainDir, "..");
   return path.join(appDir, ".jq-runtime", `${platform}-${arch}`, "jq");
+}
+
+export function resolveDownloadedMemoBin(mainDir: string): string {
+  const platform = process.platform;
+  const arch = process.arch;
+  // In dev, the entry file compiles to apps/electron-desktop/dist/main.js.
+  // We keep the built memo runtime next to the Electron app sources.
+  const appDir = path.resolve(mainDir, "..");
+  return path.join(appDir, ".memo-runtime", `${platform}-${arch}`, "memo");
 }
 
 export function resolveBundledGogCredentialsPath(): string {

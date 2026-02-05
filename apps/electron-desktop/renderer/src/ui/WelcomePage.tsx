@@ -6,6 +6,7 @@ import { routes } from "./routes";
 import { GlassCard, HeroPageLayout, InlineError, PrimaryButton } from "./kit";
 import { LoadingScreen } from "./LoadingScreen";
 import { ApiKeyPage } from "./onboarding/ApiKeyPage";
+import { AppleNotesConnectPage } from "./onboarding/AppleNotesConnectPage";
 import { GogPage } from "./onboarding/GogPage";
 import { MediaUnderstandingPage } from "./onboarding/MediaUnderstandingPage";
 import { ModelSelectPage } from "./onboarding/ModelSelectPage";
@@ -160,9 +161,24 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
             onNotionConnect={welcome.goNotion}
             trelloStatus={welcome.skills.trello}
             onTrelloConnect={welcome.goTrello}
+            appleNotesStatus={welcome.skills["apple-notes"]}
+            onAppleNotesConnect={welcome.goAppleNotes}
             onBack={welcome.goModelSelect}
             onSkip={welcome.goTelegramToken}
             onContinue={welcome.goTelegramToken}
+          />
+        }
+      />
+
+      <Route
+        path="apple-notes"
+        element={
+          <AppleNotesConnectPage
+            status={welcome.status}
+            error={welcome.error}
+            busy={welcome.appleNotesBusy}
+            onCheckAndEnable={() => void welcome.onAppleNotesCheckAndEnable()}
+            onBack={welcome.goSkills}
           />
         }
       />

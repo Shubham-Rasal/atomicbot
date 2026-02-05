@@ -1519,6 +1519,10 @@ pre {
   background: rgba(59, 130, 246, 0.22);
 }
 
+.UiSkillIcon--apple {
+  background: linear-gradient(135deg, rgba(230, 237, 243, 0.16), rgba(230, 237, 243, 0.06));
+}
+
 .UiSkillIcon--gemini {
   background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(59, 130, 246, 0.18));
 }

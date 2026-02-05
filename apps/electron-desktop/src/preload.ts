@@ -3,6 +3,14 @@ import { contextBridge, ipcRenderer } from "electron";
 import type { GogExecResult } from "./main/gog/types";
 import type { GatewayState, ResetAndCloseResult } from "./main/types";
 
+type MemoExecResult = {
+  ok: boolean;
+  code: number | null;
+  stdout: string;
+  stderr: string;
+  resolvedPath: string | null;
+};
+
 type OpenclawDesktopApi = {
   version: string;
   openLogs: () => Promise<void>;
@@ -18,6 +26,7 @@ type OpenclawDesktopApi = {
   gogAuthList: () => Promise<GogExecResult>;
   gogAuthAdd: (params: { account: string; services?: string; noInput?: boolean }) => Promise<GogExecResult>;
   gogAuthCredentials: (params: { credentialsJson: string; filename?: string }) => Promise<GogExecResult>;
+  memoCheck: () => Promise<MemoExecResult>;
   onGatewayState: (cb: (state: GatewayState) => void) => () => void;
 };
 
@@ -40,6 +49,7 @@ const api: OpenclawDesktopApi = {
     ipcRenderer.invoke("gog-auth-add", params),
   gogAuthCredentials: async (params: { credentialsJson: string; filename?: string }) =>
     ipcRenderer.invoke("gog-auth-credentials", params),
+  memoCheck: async () => ipcRenderer.invoke("memo-check"),
   onGatewayState: (cb: (state: GatewayState) => void) => {
     const handler = (_evt: unknown, state: GatewayState) => cb(state);
     ipcRenderer.on("gateway-state", handler);

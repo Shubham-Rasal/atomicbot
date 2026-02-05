@@ -1,4 +1,6 @@
 import { app, ipcMain, shell, type BrowserWindow } from "electron";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
 
 import { upsertApiKeyProfile } from "../keys/apiKeys";
 import { registerGogIpcHandlers } from "../gog/ipc";
@@ -17,6 +19,7 @@ export function registerIpcHandlers(params: {
   logsDir: string;
   openclawDir: string;
   gogBin: string;
+  memoBin: string;
   stopGatewayChild: () => Promise<void>;
 }) {
   ipcMain.handle("open-logs", async () => {
@@ -77,6 +80,34 @@ export function registerIpcHandlers(params: {
     }
     upsertApiKeyProfile({ stateDir: params.stateDir, provider, key: apiKey, profileName: "default" });
     return { ok: true } as const;
+  });
+
+  ipcMain.handle("memo-check", async () => {
+    const memoBin = params.memoBin;
+    if (!fs.existsSync(memoBin)) {
+      return {
+        ok: false,
+        code: null,
+        stdout: "",
+        stderr: `memo binary not found at: ${memoBin}\nRun: cd apps/electron-desktop && npm run prepare:memo:all`,
+        resolvedPath: null,
+      } as const;
+    }
+    const res = spawnSync(memoBin, ["--help"], {
+      encoding: "utf-8",
+      cwd: params.openclawDir,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const stdout = String(res.stdout || "");
+    const stderr = String(res.stderr || "");
+    const ok = res.status === 0;
+    return {
+      ok,
+      code: typeof res.status === "number" ? res.status : null,
+      stdout,
+      stderr,
+      resolvedPath: memoBin,
+    } as const;
   });
 
   registerGogIpcHandlers({

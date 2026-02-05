@@ -11,8 +11,9 @@
     "build:all": "npm run build && npm run build:renderer",
     "prepare:gog:all": "npm run fetch:gog && npm run prepare:gog:credentials && npm run prepare:gog",
     "prepare:jq:all": "npm run fetch:jq && npm run prepare:jq",
-    "prepare:runtimes": "npm run prepare:node && npm run prepare:gog:all && npm run prepare:jq:all",
-    "dev": "npm run build:all && npm run fetch:gog && npm run fetch:jq && npm run prepare:gog:credentials && cross-env ELECTRON_RUN_AS_NODE= electron .",
+    "prepare:memo:all": "npm run fetch:memo && npm run build:memo && npm run prepare:memo",
+    "prepare:runtimes": "npm run prepare:node && npm run prepare:gog:all && npm run prepare:jq:all && npm run prepare:memo:all",
+    "dev": "npm run build:all && npm run fetch:gog && npm run fetch:jq && npm run fetch:memo && npm run prepare:gog:credentials && cross-env ELECTRON_RUN_AS_NODE= electron .",
     "build": "tsc -p tsconfig.json",
     "build:renderer": "vite build --config renderer/vite.config.ts",
     "prepare:all": "npm run prepare:openclaw && npm run prepare:runtimes",
@@ -20,9 +21,12 @@
     "prepare:node": "node scripts/prepare-node-runtime.mjs",
     "fetch:gog": "node scripts/fetch-gog-runtime.mjs",
     "fetch:jq": "node scripts/fetch-jq-runtime.mjs",
+    "fetch:memo": "node scripts/fetch-memo-runtime.mjs",
+    "build:memo": "node scripts/build-memo-runtime.mjs",
     "prepare:gog:credentials": "node --env-file=.env scripts/prepare-gog-credentials.mjs",
     "prepare:gog": "node scripts/prepare-gog-runtime.mjs",
     "prepare:jq": "node scripts/prepare-jq-runtime.mjs",
+    "prepare:memo": "node scripts/prepare-memo-runtime.mjs",
     "reset:local": "node scripts/reset-local-state.mjs",
     "reset:local:yes": "node scripts/reset-local-state.mjs --yes",
     "dist:local": "CSC_IDENTITY_AUTO_DISCOVERY=false npm run dist -- --publish never",
@@ -100,6 +104,10 @@
       {
         "from": "vendor/jq",
         "to": "jq"
+      },
+      {
+        "from": "vendor/memo",
+        "to": "memo"
       },
       {
         "from": ".gog-runtime/credentials",

@@ -10,10 +10,12 @@ import { spawnGateway } from "./main/gateway/spawn";
 import {
   resolveBundledGogBin,
   resolveBundledJqBin,
+  resolveBundledMemoBin,
   resolveBundledNodeBin,
   resolveBundledOpenClawDir,
   resolveDownloadedGogBin,
   resolveDownloadedJqBin,
+  resolveDownloadedMemoBin,
   resolvePreloadPath,
   resolveRendererIndex,
   resolveRepoRoot,
@@ -186,6 +188,7 @@ app.whenReady().then(async () => {
     : (process.env.OPENCLAW_DESKTOP_NODE_BIN || "node").trim() || "node";
   const gogBin = app.isPackaged ? resolveBundledGogBin() : resolveDownloadedGogBin(MAIN_DIR);
   const jqBin = app.isPackaged ? resolveBundledJqBin() : resolveDownloadedJqBin(MAIN_DIR);
+  const memoBin = app.isPackaged ? resolveBundledMemoBin() : resolveDownloadedMemoBin(MAIN_DIR);
 
   const port = await pickPort(DEFAULT_PORT);
   const url = `http://127.0.0.1:${port}/`;
@@ -224,6 +227,7 @@ app.whenReady().then(async () => {
       nodeBin,
       gogBin,
       jqBin,
+      memoBin,
       electronRunAsNode: nodeBin === process.execPath,
       stderrTail,
     });
@@ -264,6 +268,7 @@ app.whenReady().then(async () => {
     logsDir,
     openclawDir,
     gogBin,
+    memoBin,
     stopGatewayChild,
   });
 

@@ -10,7 +10,7 @@ type SkillEntry = {
   description: string;
   status: SkillStatus;
   iconText: string;
-  iconVariant: "google" | "notion" | "trello" | "gemini" | "nano-banana" | "sag";
+  iconVariant: "google" | "notion" | "trello" | "gemini" | "nano-banana" | "sag" | "apple";
 };
 
 const SKILLS: SkillEntry[] = [
@@ -53,6 +53,14 @@ const SKILLS: SkillEntry[] = [
     status: "connect",
     iconText: "T",
     iconVariant: "trello",
+  },
+  {
+    id: "apple-notes",
+    name: "Apple Notes",
+    description: "Create, search and organize notes without leaving your keyboard",
+    status: "connect",
+    iconText: "",
+    iconVariant: "apple",
   },
   {
     id: "gemini",
@@ -119,6 +127,8 @@ export function SkillsSetupPage(props: {
   onNotionConnect: () => void;
   trelloStatus: Exclude<SkillStatus, "coming-soon">;
   onTrelloConnect: () => void;
+  appleNotesStatus: Exclude<SkillStatus, "coming-soon">;
+  onAppleNotesConnect: () => void;
   onBack: () => void;
   onSkip: () => void;
   onContinue: () => void;
@@ -155,6 +165,8 @@ export function SkillsSetupPage(props: {
                     ? props.notionStatus
                     : skill.id === "trello"
                       ? props.trelloStatus
+                    : skill.id === "apple-notes"
+                      ? props.appleNotesStatus
                     : skill.status;
               const onConnect =
                 skill.id === "google-workspace"
@@ -167,6 +179,8 @@ export function SkillsSetupPage(props: {
                     ? props.onNotionConnect
                     : skill.id === "trello"
                       ? props.onTrelloConnect
+                    : skill.id === "apple-notes"
+                      ? props.onAppleNotesConnect
                     : undefined;
               const effectiveStatus: SkillStatus =
                 onConnect || status === "connected" ? status : "coming-soon";
