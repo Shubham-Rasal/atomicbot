@@ -139,7 +139,7 @@ export function MediaUnderstandingPage(props: {
           ) : null}
         </div>
 
-        <div className="UiGoogleWorkspaceBottomRow" style={{ marginTop: 14 }}>
+        <div className="UiGoogleWorkspaceBottomRow">
           <button
             className="UiTextButton"
             onClick={props.onBack}

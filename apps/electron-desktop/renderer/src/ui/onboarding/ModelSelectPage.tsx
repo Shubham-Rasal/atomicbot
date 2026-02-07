@@ -154,13 +154,6 @@ export function ModelSelectPage(props: {
                   onChange={() => setSelected(modelKey)}
                   className="UiProviderRadio"
                 />
-                <span className="UiProviderIconWrap" aria-hidden="true">
-                  <img
-                    className="UiProviderIcon"
-                    src={resolveProviderIconUrl(model.provider as ModelProvider)}
-                    alt=""
-                  />
-                </span>
                 <div className="UiProviderContent">
                   <div className="UiProviderHeader">
                     <span className="UiProviderName">{model.name || model.id}</span>

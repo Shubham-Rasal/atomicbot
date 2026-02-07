@@ -1238,6 +1238,7 @@ pre {
   scrollbar-width: thin;
   scrollbar-color: #ffffff26 transparent;
   margin-bottom: 10px;
+  padding-bottom: 4px;
 }
 
 .UiContentWrapper::-webkit-scrollbar {
@@ -1412,7 +1413,7 @@ pre {
 }
 
 .UiProviderRadio:checked {
-  background-color: #c3ff44;
+  background-color: #1C8AF5;
 }
 
 .UiProviderRadio:checked::after {
@@ -1431,15 +1432,14 @@ pre {
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  background: #343434;
   display: grid;
   place-items: center;
   flex-shrink: 0;
 }
 
 .UiProviderIcon {
-  width: 18px;
-  height: 18px;
+  width: 28px;
+  height: 28px;
   display: block;
 }
 
