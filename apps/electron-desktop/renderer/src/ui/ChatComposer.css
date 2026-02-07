@@ -344,3 +344,20 @@
   height: 20px;
   display: block;
 }
+
+.UiChatStopButton {
+  background: #FFFFFF;
+}
+
+.UiChatStopButtonInner {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  aspect-ratio: 1/1;
+  border-radius: 4px;
+  background: #0D0D17;
+}
+
+.UiChatStopButton:hover:not(:disabled) {
+  opacity: 0.9;
+}

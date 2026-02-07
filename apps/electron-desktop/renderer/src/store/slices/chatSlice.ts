@@ -291,8 +291,36 @@ const chatSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
     },
+    /** Clear transcript when switching to another session so we don't show the previous thread. */
+    sessionCleared(state) {
+      state.messages = [];
+      state.streamByRun = {};
+    },
     historyLoaded(state, action: PayloadAction<UiMessage[]>) {
-      state.messages = action.payload;
+      const fromHistory = action.payload;
+      const lastHistoryTs =
+        fromHistory.length > 0
+          ? Math.max(
+              ...fromHistory.map((m) => m.ts ?? 0),
+            )
+          : 0;
+      // Keep assistant messages from live stream (runId) that are newer than history,
+      // so we don't lose them when the API hasn't persisted yet.
+      const liveOnly: UiMessage[] = [];
+      for (const m of state.messages) {
+        if (
+          m.role === "assistant" &&
+          m.runId &&
+          m.ts != null &&
+          m.ts > lastHistoryTs
+        ) {
+          liveOnly.push(m);
+        }
+      }
+      state.messages =
+        liveOnly.length > 0
+          ? [...fromHistory, ...liveOnly.sort((a, b) => (a.ts ?? 0) - (b.ts ?? 0))]
+          : fromHistory;
       state.streamByRun = {};
     },
     userMessageQueued(state, action: PayloadAction<{ localId: string; message: string }>) {

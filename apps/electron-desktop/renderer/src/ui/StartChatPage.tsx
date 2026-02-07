@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useGatewayRpc } from "../gateway/context";
 import type { GatewayState } from "../../../src/main/types";
 import { dataUrlToBase64, type ChatAttachmentInput } from "../store/slices/chatSlice";
-import { ChatComposer } from "./ChatComposer";
+import { ChatComposer, type ChatComposerRef } from "./ChatComposer";
 import { addToastError } from "./toast";
 import { routes } from "./routes";
 
@@ -18,9 +18,15 @@ export function StartChatPage({
 }) {
   const navigate = useNavigate();
   const gw = useGatewayRpc();
+  const composerRef = React.useRef<ChatComposerRef | null>(null);
   const [input, setInput] = React.useState("");
   const [attachments, setAttachments] = React.useState<ChatAttachmentInput[]>([]);
   const [sending, setSending] = React.useState(false);
+
+  React.useEffect(() => {
+    const id = requestAnimationFrame(() => composerRef.current?.focusInput());
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const logoUrl = React.useMemo(() => {
     return new URL("../../assets/main-logo.png", document.baseURI).toString();
@@ -99,6 +105,7 @@ export function StartChatPage({
       </div>
 
       <ChatComposer
+        ref={composerRef}
         value={input}
         onChange={setInput}
         attachments={attachments}

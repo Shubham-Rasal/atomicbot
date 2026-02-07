@@ -13,7 +13,7 @@ import {
 } from "../store/slices/chatSlice";
 import type { GatewayState } from "../../../src/main/types";
 import { ChatAttachmentCard, getFileTypeLabel } from "./ChatAttachmentCard";
-import { ChatComposer } from "./ChatComposer";
+import { ChatComposer, type ChatComposerRef } from "./ChatComposer";
 import { addToastError } from "./toast";
 
 function CopyIcon() {
@@ -105,6 +105,7 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
 
   const gw = useGatewayRpc();
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const composerRef = React.useRef<ChatComposerRef | null>(null);
 
   /** First user message in history that matches optimistic text; used for seamless handoff. */
   const matchingFirstUserFromHistory = React.useMemo(() => {
@@ -150,6 +151,17 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
   const refresh = React.useCallback(() => {
     void dispatch(loadChatHistory({ request: gw.request, sessionKey, limit: 200 }));
   }, [dispatch, gw.request, sessionKey]);
+
+  // Clear messages and stream when switching sessions, so we don't show another thread.
+  React.useEffect(() => {
+    dispatch(chatActions.sessionCleared());
+  }, [sessionKey, dispatch]);
+
+  // Focus input when opening chat page or switching between chats.
+  React.useEffect(() => {
+    const id = requestAnimationFrame(() => composerRef.current?.focusInput());
+    return () => cancelAnimationFrame(id);
+  }, [sessionKey]);
 
   React.useEffect(() => {
     refresh();
@@ -310,6 +322,7 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
       </div>
 
       <ChatComposer
+        ref={composerRef}
         value={input}
         onChange={setInput}
         attachments={attachments}
