@@ -89,6 +89,12 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
     const state = location.state as { pendingFirstMessage?: string } | null;
     return state?.pendingFirstMessage ?? null;
   });
+  const [optimisticFirstAttachments, setOptimisticFirstAttachments] = React.useState<
+    ChatAttachmentInput[] | null
+  >(() => {
+    const state = location.state as { pendingFirstAttachments?: ChatAttachmentInput[] } | null;
+    return state?.pendingFirstAttachments ?? null;
+  });
 
   const dispatch = useAppDispatch();
   const messages = useAppSelector((s) => s.chat.messages);
@@ -148,12 +154,27 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
     refresh();
   }, [refresh]);
 
-  // Clear optimistic first message only when history has the matching user message (seamless handoff).
+  // Clear optimistic first message and attachments only when history has the matching user message (seamless handoff).
   React.useEffect(() => {
     if (matchingFirstUserFromHistory != null && optimisticFirstMessage != null) {
       setOptimisticFirstMessage(null);
+      setOptimisticFirstAttachments(null);
     }
   }, [matchingFirstUserFromHistory, optimisticFirstMessage]);
+
+  // Derived list and waiting state (needed for scroll deps).
+  const allMessages =
+    matchingFirstUserFromHistory != null
+      ? messages
+      : optimisticFirstMessage != null
+        ? [{ id: "opt-first", role: "user" as const, text: optimisticFirstMessage }, ...messages]
+        : messages;
+  const displayMessages = allMessages.filter((m) => m.role === "user" || m.role === "assistant");
+  // Hide loader as soon as the first stream delta arrives (streamByRun gets an entry).
+  const waitingForFirstResponse =
+    displayMessages.some((m) => m.role === "user") &&
+    !displayMessages.some((m) => m.role === "assistant") &&
+    Object.keys(streamByRun).length === 0;
 
   React.useEffect(() => {
     const el = scrollRef.current;
@@ -161,7 +182,7 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
       return;
     }
     el.scrollTop = el.scrollHeight;
-  }, [messages.length, optimisticFirstMessage, streamByRun]);
+  }, [messages.length, optimisticFirstMessage, streamByRun, waitingForFirstResponse]);
 
   React.useEffect(() => {
     if (error) {
@@ -184,16 +205,6 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
     );
   }, [dispatch, gw.request, input, sessionKey, attachments]);
 
-  // Show optimistic first user until history contains the same message; then use history only (no duplicate, no flicker).
-  const allMessages =
-    matchingFirstUserFromHistory != null
-      ? messages
-      : optimisticFirstMessage != null
-        ? [{ id: "opt-first", role: "user" as const, text: optimisticFirstMessage }, ...messages]
-        : messages;
-
-  const displayMessages = allMessages.filter((m) => m.role === "user" || m.role === "assistant");
-
   /** Stable key for the first user message so React doesn't remount when switching from optimistic to history. */
   const getMessageKey = (m: (typeof displayMessages)[number]) =>
     (optimisticFirstMessage != null && m.id === "opt-first") ||
@@ -204,42 +215,52 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
   return (
     <div className="UiChatShell">
       <div className="UiChatTranscript" ref={scrollRef}>
-        {displayMessages.map((m) => (
-          <div key={getMessageKey(m)} className={`UiChatRow UiChatRow-${m.role}`}>
-            <div className={`UiChatBubble UiChatBubble-${m.role}`}>
-              {m.pending && (
-                <div className="UiChatBubbleMeta">
-                  <span className="UiChatPending">sending…</span>
+        {displayMessages.map((m) => {
+          const attachmentsToShow: UiMessageAttachment[] =
+            m.id === "opt-first" && optimisticFirstAttachments?.length
+              ? optimisticFirstAttachments.map((att) => ({
+                  type: att.mimeType?.startsWith("image/") ? "image" : "file",
+                  mimeType: att.mimeType,
+                  dataUrl: att.dataUrl,
+                }))
+              : (m.attachments ?? []);
+          return (
+            <div key={getMessageKey(m)} className={`UiChatRow UiChatRow-${m.role}`}>
+              <div className={`UiChatBubble UiChatBubble-${m.role}`}>
+                {m.pending && (
+                  <div className="UiChatBubbleMeta">
+                    <span className="UiChatPending">sending…</span>
+                  </div>
+                )}
+                {attachmentsToShow.length > 0 ? (
+                  <div className="UiChatMessageAttachments">
+                    {attachmentsToShow.map((att: UiMessageAttachment, idx: number) => {
+                      const isImage = att.dataUrl && (att.mimeType?.startsWith("image/") ?? false);
+                      if (!isImage) return null;
+                      return (
+                        <div key={`${m.id}-att-${idx}`} className="UiChatMessageAttachment">
+                          {isImage && att.dataUrl && (
+                            <img src={att.dataUrl} alt="" className="UiChatMessageAttachmentImg" />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
+                <div className="UiChatText UiMarkdown">
+                  <Markdown>{m.text}</Markdown>
                 </div>
-              )}
-              {m.attachments && m.attachments.length > 0 ? (
-                <div className="UiChatMessageAttachments">
-                  {m.attachments.map((att: UiMessageAttachment, idx: number) => {
-                    const isImage = att.dataUrl && (att.mimeType?.startsWith("image/") ?? false);
-                    if (!isImage) return null;
-                    return (
-                      <div key={`${m.id}-att-${idx}`} className="UiChatMessageAttachment">
-                        {isImage && att.dataUrl && (
-                          <img src={att.dataUrl} alt="" className="UiChatMessageAttachmentImg" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : null}
-              <div className="UiChatText UiMarkdown">
-                <Markdown>{m.text}</Markdown>
+                {m.role === "assistant" && (
+                  <div className="UiChatMessageActions">
+                    <CopyMessageButton text={m.text} />
+                  </div>
+                )}
               </div>
-              {m.role === "assistant" && (
-                <div className="UiChatMessageActions">
-                  <CopyMessageButton text={m.text} />
-                </div>
-              )}
             </div>
-          </div>
-        ))}
-        {Object.values(streamByRun).map((m) => (
-          <div key={m.id} className="UiChatRow UiChatRow-assistant">
+          );
+        })}
+        {waitingForFirstResponse ? (
+          <div className="UiChatRow UiChatRow-assistant">
             <div className="UiChatBubble UiChatBubble-assistant UiChatBubble-stream">
               <div className="UiChatBubbleMeta">
                 <span className="UiChatPending">
@@ -250,6 +271,12 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
                   </span>
                 </span>
               </div>
+            </div>
+          </div>
+        ) : null}
+        {Object.values(streamByRun).map((m) => (
+          <div key={m.id} className="UiChatRow UiChatRow-assistant">
+            <div className="UiChatBubble UiChatBubble-assistant UiChatBubble-stream">
               {m.text ? (
                 <div className="UiChatText UiMarkdown">
                   <Markdown>{m.text}</Markdown>

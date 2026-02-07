@@ -78,6 +78,7 @@ export function StartChatPage({
         state: {
           optimisticNewSession: { key: sessionKey, title },
           pendingFirstMessage: message || title,
+          pendingFirstAttachments: attachments.length > 0 ? attachments : undefined,
         },
       });
     } catch (err) {
