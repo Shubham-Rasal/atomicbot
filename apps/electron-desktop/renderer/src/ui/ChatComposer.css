@@ -346,7 +346,7 @@
 }
 
 .UiChatStopButton {
-  background: #FFFFFF;
+  background: #ffffff;
 }
 
 .UiChatStopButtonInner {
@@ -355,7 +355,7 @@
   flex-shrink: 0;
   aspect-ratio: 1/1;
   border-radius: 4px;
-  background: #0D0D17;
+  background: #0d0d17;
 }
 
 .UiChatStopButton:hover:not(:disabled) {

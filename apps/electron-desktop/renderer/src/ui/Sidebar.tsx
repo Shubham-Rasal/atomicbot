@@ -128,7 +128,7 @@ export function Sidebar() {
     (key: string) => {
       void navigate(`${routes.chat}?session=${encodeURIComponent(key)}`, { replace: true });
     },
-    [navigate],
+    [navigate]
   );
 
   const handleDeleteSession = React.useCallback(
@@ -143,7 +143,7 @@ export function Sidebar() {
         addToastError(String(err));
       }
     },
-    [gw.request, loadSessionsWithTitles, currentSessionKey, navigate],
+    [gw.request, loadSessionsWithTitles, currentSessionKey, navigate]
   );
 
   return (

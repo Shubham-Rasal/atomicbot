@@ -299,21 +299,12 @@ const chatSlice = createSlice({
     historyLoaded(state, action: PayloadAction<UiMessage[]>) {
       const fromHistory = action.payload;
       const lastHistoryTs =
-        fromHistory.length > 0
-          ? Math.max(
-              ...fromHistory.map((m) => m.ts ?? 0),
-            )
-          : 0;
+        fromHistory.length > 0 ? Math.max(...fromHistory.map((m) => m.ts ?? 0)) : 0;
       // Keep assistant messages from live stream (runId) that are newer than history,
       // so we don't lose them when the API hasn't persisted yet.
       const liveOnly: UiMessage[] = [];
       for (const m of state.messages) {
-        if (
-          m.role === "assistant" &&
-          m.runId &&
-          m.ts != null &&
-          m.ts > lastHistoryTs
-        ) {
+        if (m.role === "assistant" && m.runId && m.ts != null && m.ts > lastHistoryTs) {
           liveOnly.push(m);
         }
       }
