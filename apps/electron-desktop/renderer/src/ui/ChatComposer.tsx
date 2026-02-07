@@ -157,7 +157,7 @@ export function ChatComposer({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*,application/pdf"
+          accept="image/*"
           multiple
           className="UiChatFileInput"
           aria-hidden
