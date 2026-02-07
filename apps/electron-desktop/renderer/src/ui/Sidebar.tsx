@@ -171,13 +171,7 @@ export function Sidebar() {
       </div>
 
       <div className="UiChatSidebarFooter">
-        <NavLink
-          to={routes.settings}
-          className={({ isActive }) =>
-            `UiChatSidebarSettings${isActive ? " UiChatSidebarSettings-active" : ""}`
-          }
-          aria-label="Settings"
-        >
+        <NavLink to={routes.settings} className="UiChatSidebarSettings" aria-label="Settings">
           <span className="UiChatSidebarSettingsIcon" aria-hidden="true">
             <svg
               xmlns="http://www.w3.org/2000/svg"
