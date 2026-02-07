@@ -5,6 +5,7 @@ import type { OptimisticSession } from "./optimisticSessionContext";
 import { useOptimisticSession } from "./optimisticSessionContext";
 import { routes } from "./routes";
 import { addToastError } from "./toast";
+import { SplashLogo } from "./kit";
 
 type SessionsListResult = {
   ts: number;
@@ -137,9 +138,7 @@ export function Sidebar() {
         onClick={handleNewSession}
         aria-label="New session"
       >
-        <span className="UiChatSidebarNewSessionIcon" aria-hidden="true">
-          +
-        </span>
+        <SplashLogo size={20} />
         New session
       </button>
 

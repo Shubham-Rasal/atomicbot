@@ -415,8 +415,6 @@ button:disabled {
 }
 
 .UiSplashLogo {
-  width: 64px;
-  height: 64px;
   border-radius: 18px;
   object-fit: contain;
   filter: drop-shadow(0 18px 55px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 18px rgba(194, 255, 64, 0.1));

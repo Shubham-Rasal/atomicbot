@@ -35,7 +35,7 @@ function useAppIconUrl(): string {
   }, []);
 }
 
-export function SplashLogo({ iconAlt = "" }: { iconAlt?: string }) {
+export function SplashLogo({ iconAlt = "", size = 64 }: { iconAlt?: string; size?: number }) {
   const iconUrl = useAppIconUrl();
   return (
     <img
@@ -43,6 +43,8 @@ export function SplashLogo({ iconAlt = "" }: { iconAlt?: string }) {
       src={iconUrl}
       alt={iconAlt}
       aria-hidden={iconAlt ? undefined : true}
+      width={size}
+      height={size}
     />
   );
 }
@@ -59,7 +61,14 @@ export function SpinningSplashLogo({
     : "UiSplashLogo UiSplashLogo--spin";
   const iconUrl = useAppIconUrl();
   return (
-    <img className={merged} src={iconUrl} alt={iconAlt} aria-hidden={iconAlt ? undefined : true} />
+    <img
+      className={merged}
+      width={64}
+      height={64}
+      src={iconUrl}
+      alt={iconAlt}
+      aria-hidden={iconAlt ? undefined : true}
+    />
   );
 }
 

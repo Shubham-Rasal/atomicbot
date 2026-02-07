@@ -171,7 +171,21 @@ export function ChatComposer({
             aria-label="Attach file"
             title="Attach file or image"
           >
-            +
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 18 18"
+              fill="none"
+            >
+              <path
+                d="M9.00012 3.1499V14.8499M14.8501 8.9999H3.15012"
+                stroke="white"
+                stroke-width="1.503"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
           </button>
           <button
             type="button"
