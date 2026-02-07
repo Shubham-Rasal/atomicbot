@@ -170,7 +170,10 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
       : optimisticFirstMessage != null
         ? [{ id: "opt-first", role: "user" as const, text: optimisticFirstMessage }, ...messages]
         : messages;
-  const displayMessages = allMessages.filter((m) => m.role === "user" || m.role === "assistant");
+  const displayMessages = allMessages.filter(
+    (m) => (m.role === "user" || m.role === "assistant") && m.text !== "[2 file(s)]"
+  );
+
   // Hide loader as soon as the first stream delta arrives (streamByRun gets an entry).
   const waitingForFirstResponse =
     displayMessages.some((m) => m.role === "user") &&
