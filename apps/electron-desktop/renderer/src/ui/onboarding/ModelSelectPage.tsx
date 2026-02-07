@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { GlassCard, HeroPageLayout, PrimaryButton } from "../kit";
 import {
@@ -31,6 +31,13 @@ export function ModelSelectPage(props: {
     }
     return sortModelsByProviderTierName(models);
   }, [props.models, props.filterProvider]);
+
+  useEffect(() => {
+    if(filteredModels.length > 0) {
+      const model = filteredModels[0]
+      setSelected(`${model.provider}/${model.id}`);
+    }
+  }, [filteredModels])
 
   if (props.loading) {
     return (
