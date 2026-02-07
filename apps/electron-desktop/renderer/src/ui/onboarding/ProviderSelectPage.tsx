@@ -35,11 +35,13 @@ export function ProviderSelectPage(props: {
             />
           ))}
         </div>
+
         <div className="UiSectionTitle">Select AI Provider</div>
         <div className="UiSectionSubtitle">
           Choose your preferred AI provider. You can configure additional providers later.
         </div>
-        <div className="UiProviderList">
+
+        <div className="UiProviderList UiListWithScroll">
           {MODEL_PROVIDERS.map((provider) => (
             <label
               key={provider.id}

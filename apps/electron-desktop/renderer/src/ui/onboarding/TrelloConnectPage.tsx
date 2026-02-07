@@ -37,58 +37,61 @@ export function TrelloConnectPage(props: {
         </div>
 
         <div className="UiApiKeyTitle">Connect Trello</div>
-        <div className="UiApiKeySubtitle">
-          Get your Trello API key and token from{" "}
-          <a
-            href="https://trello.com/app-key"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="UiLink"
-            onClick={(e) => {
-              e.preventDefault();
-              void window.openclawDesktop?.openExternal("https://trello.com/app-key");
-            }}
-          >
-            trello.com/app-key ↗
-          </a>
+
+        <div className="UiContentWrapper">
+          <div className="UiApiKeySubtitle">
+            Get your Trello API key and token from{" "}
+            <a
+              href="https://trello.com/app-key"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="UiLink"
+              onClick={(e) => {
+                e.preventDefault();
+                void window.openclawDesktop?.openExternal("https://trello.com/app-key");
+              }}
+            >
+              trello.com/app-key ↗
+            </a>
+          </div>
+
+          <div className="UiSectionSubtitle">
+            Steps:
+            <ol>
+              <li>Open the app key page.</li>
+              <li>Copy your API key.</li>
+              <li>Click the Token link and generate a token.</li>
+              <li>Paste both values here.</li>
+            </ol>
+          </div>
+
+          {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
+
+          <div className="UiApiKeyInputRow" style={{ display: "grid", gap: 10 }}>
+            <TextInput
+              type="password"
+              value={apiKey}
+              onChange={setApiKey}
+              placeholder="Trello API key"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              disabled={props.busy}
+            />
+            <TextInput
+              type="password"
+              value={token}
+              onChange={setToken}
+              placeholder="Trello token"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              disabled={props.busy}
+            />
+          </div>
+
+          <div className="UiApiKeySpacer" aria-hidden="true" />
         </div>
-
-        <div className="UiSectionSubtitle">
-          Steps:
-          <ol>
-            <li>Open the app key page.</li>
-            <li>Copy your API key.</li>
-            <li>Click the Token link and generate a token.</li>
-            <li>Paste both values here.</li>
-          </ol>
-        </div>
-
-        {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
-
-        <div className="UiApiKeyInputRow" style={{ display: "grid", gap: 10 }}>
-          <TextInput
-            type="password"
-            value={apiKey}
-            onChange={setApiKey}
-            placeholder="Trello API key"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            disabled={props.busy}
-          />
-          <TextInput
-            type="password"
-            value={token}
-            onChange={setToken}
-            placeholder="Trello token"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            disabled={props.busy}
-          />
-        </div>
-
-        <div className="UiApiKeySpacer" aria-hidden="true" />
 
         <div className="UiApiKeyButtonRow">
           <button

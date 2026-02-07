@@ -17,7 +17,7 @@ export function TelegramTokenPage(props: {
 
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Telegram token setup">
-      <GlassCard className="UiApiKeyCard">
+      <GlassCard className="UiApiKeyCard UiGlassCardOnboarding">
         <div className="UiOnboardingDots" aria-label="Onboarding progress">
           {Array.from({ length: totalSteps }).map((_, idx) => (
             <span
@@ -30,49 +30,52 @@ export function TelegramTokenPage(props: {
         </div>
 
         <div className="UiApiKeyTitle">Connect Telegram</div>
-        <div className="UiApiKeySubtitle">
-          Paste your bot token from <strong>@BotFather</strong>. We'll store it under{" "}
-          <code>channels.telegram.botToken</code>.
+
+        <div className="UiContentWrapper">
+          <div className="UiApiKeySubtitle">
+            Paste your bot token from <strong>@BotFather</strong>. We'll store it under{" "}
+            <code>channels.telegram.botToken</code>.
+          </div>
+
+          <div className="UiSectionSubtitle">
+            Steps:
+            <ol>
+              <li>Create a bot with @BotFather and copy the token.</li>
+              <li>Paste the token here and save.</li>
+            </ol>
+            Docs:{" "}
+            <a
+              href="https://docs.openclaw.ai/channels/telegram"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="UiLink"
+              onClick={(e) => {
+                e.preventDefault();
+                void window.openclawDesktop?.openExternal(
+                  "https://docs.openclaw.ai/channels/telegram"
+                );
+              }}
+            >
+              Telegram setup ↗
+            </a>
+          </div>
+
+          {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
+
+          <div className="UiApiKeyInputRow">
+            <TextInput
+              type="password"
+              value={props.telegramToken}
+              onChange={props.setTelegramToken}
+              placeholder="123456789:ABCDEF..."
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+          </div>
+
+          <div className="UiApiKeySpacer" aria-hidden="true" />
         </div>
-
-        <div className="UiSectionSubtitle">
-          Steps:
-          <ol>
-            <li>Create a bot with @BotFather and copy the token.</li>
-            <li>Paste the token here and save.</li>
-          </ol>
-          Docs:{" "}
-          <a
-            href="https://docs.openclaw.ai/channels/telegram"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="UiLink"
-            onClick={(e) => {
-              e.preventDefault();
-              void window.openclawDesktop?.openExternal(
-                "https://docs.openclaw.ai/channels/telegram"
-              );
-            }}
-          >
-            Telegram setup ↗
-          </a>
-        </div>
-
-        {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
-
-        <div className="UiApiKeyInputRow">
-          <TextInput
-            type="password"
-            value={props.telegramToken}
-            onChange={props.setTelegramToken}
-            placeholder="123456789:ABCDEF..."
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-          />
-        </div>
-
-        <div className="UiApiKeySpacer" aria-hidden="true" />
 
         <div className="UiApiKeyButtonRow">
           <button className="UiTextButton" onClick={props.onSkip} type="button">

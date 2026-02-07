@@ -95,58 +95,60 @@ export function GogPage(props: {
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Google Workspace setup">
       <GlassCard className="UiGoogleWorkspaceCard UiGlassCardOnboarding">
-        <div>
-          <div className="UiSectionTitle">Google Workspace</div>
-          <div className="UiSectionSubtitle">
-            Optional: connect your Google account to enable skills like email and calendar. This
-            will open a browser for consent.
-          </div>
-          {connected ? (
-            <div className="UiGoogleWorkspaceConnected" aria-label="Connected">
-              ✓ Connected
+        <div className="UiSectionTitle">Google Workspace</div>
+        <div className='UiContentWrapper'>
+          <div>
+            <div className="UiSectionSubtitle">
+              Optional: connect your Google account to enable skills like email and calendar. This
+              will open a browser for consent.
             </div>
+            {connected ? (
+              <div className="UiGoogleWorkspaceConnected" aria-label="Connected">
+                ✓ Connected
+              </div>
+            ) : null}
+            {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
+
+            <div className="UiGoogleWorkspaceForm">
+              <TextInput
+                type="text"
+                value={props.gogAccount}
+                onChange={props.setGogAccount}
+                placeholder="you@gmail.com"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={props.gogBusy}
+                label={"Account"}
+              />
+
+              <div className="UiSectionSubtitle" style={{ margin: "14px 0 0" }}>
+                Enable
+              </div>
+              <div className="UiGoogleWorkspaceServices">
+                {SERVICE_OPTIONS.map((svc) => (
+                  <CheckboxRow
+                    key={svc.id}
+                    checked={Boolean(services[svc.id])}
+                    disabled={props.gogBusy}
+                    onChange={(checked) => {
+                      setServices((prev) => ({ ...prev, [svc.id]: checked }));
+                    }}
+                  >
+                    <strong>{svc.label}</strong> — {svc.description}
+                  </CheckboxRow>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {props.gogOutput ? (
+            <details className="UiGoogleWorkspaceDetails">
+              <summary className="UiGoogleWorkspaceDetailsSummary">Details</summary>
+              <pre className="UiGoogleWorkspaceDetailsPre">{props.gogOutput}</pre>
+            </details>
           ) : null}
-          {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
-
-          <div className="UiGoogleWorkspaceForm">
-            <TextInput
-              type="text"
-              value={props.gogAccount}
-              onChange={props.setGogAccount}
-              placeholder="you@gmail.com"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              disabled={props.gogBusy}
-              label={"Account"}
-            />
-
-            <div className="UiSectionSubtitle" style={{ margin: "14px 0 0" }}>
-              Enable
-            </div>
-            <div className="UiGoogleWorkspaceServices">
-              {SERVICE_OPTIONS.map((svc) => (
-                <CheckboxRow
-                  key={svc.id}
-                  checked={Boolean(services[svc.id])}
-                  disabled={props.gogBusy}
-                  onChange={(checked) => {
-                    setServices((prev) => ({ ...prev, [svc.id]: checked }));
-                  }}
-                >
-                  <strong>{svc.label}</strong> — {svc.description}
-                </CheckboxRow>
-              ))}
-            </div>
-          </div>
         </div>
-
-        {props.gogOutput ? (
-          <details className="UiGoogleWorkspaceDetails">
-            <summary className="UiGoogleWorkspaceDetailsSummary">Details</summary>
-            <pre className="UiGoogleWorkspaceDetailsPre">{props.gogOutput}</pre>
-          </details>
-        ) : null}
 
         <div className="UiGoogleWorkspaceBottomRow">
           <button className="UiTextButton" onClick={skip} type="button" disabled={props.gogBusy}>

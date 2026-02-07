@@ -6,7 +6,6 @@ import {
   HeroPageLayout,
   InlineError,
   PrimaryButton,
-  SecondaryButton,
   TextInput,
 } from "../kit";
 import { addToastError } from "../toast";
@@ -60,18 +59,19 @@ export function MediaUnderstandingPage(props: {
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Media understanding setup">
       <GlassCard className="UiGoogleWorkspaceCard UiGlassCardOnboarding">
-        <div>
-          <div className="UiOnboardingDots" aria-label="Onboarding progress">
-            {Array.from({ length: totalSteps }).map((_, idx) => (
-              <span
-                // eslint-disable-next-line react/no-array-index-key
-                key={idx}
-                className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
-                aria-hidden="true"
-              />
-            ))}
-          </div>
-          <div className="UiSectionTitle">Media Understanding</div>
+        <div className="UiOnboardingDots" aria-label="Onboarding progress">
+          {Array.from({ length: totalSteps }).map((_, idx) => (
+            <span
+              // eslint-disable-next-line react/no-array-index-key
+              key={idx}
+              className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
+              aria-hidden="true"
+            />
+          ))}
+        </div>
+        <div className="UiSectionTitle">Media Understanding</div>
+
+        <div className='UiContentWrapper'>
           <div className="UiSectionSubtitle">
             Let OpenClaw understand images, voice notes, and videos you send. It automatically picks
             a compatible provider based on the API keys you already configured.

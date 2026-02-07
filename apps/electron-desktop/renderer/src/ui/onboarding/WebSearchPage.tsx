@@ -56,7 +56,6 @@ export function WebSearchPage(props: {
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Web search setup">
       <GlassCard className="UiApiKeyCard UiGlassCardOnboarding">
-        <div>
           <div className="UiOnboardingDots" aria-label="Onboarding progress">
             {Array.from({ length: totalSteps }).map((_, idx) => (
               <span
@@ -69,74 +68,76 @@ export function WebSearchPage(props: {
           </div>
 
           <div className="UiApiKeyTitle">Enable Web Search</div>
-          <div className="UiApiKeySubtitle">
-            Choose your web search provider and add an API key for the <code>web_search</code> tool.
-          </div>
 
-          <div className="UiProviderList" style={{ marginTop: 12 }}>
-            {PROVIDERS.map((p) => (
-              <label
-                key={p.id}
-                className={`UiProviderOption ${provider === p.id ? "UiProviderOption--selected" : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="web-search-provider"
-                  value={p.id}
-                  checked={provider === p.id}
-                  onChange={() => setProvider(p.id)}
-                  className="UiProviderRadio"
-                  disabled={props.busy}
-                />
-                <div className="UiProviderContent">
-                  <div className="UiProviderHeader">
-                    <span className="UiProviderName">{p.name}</span>
+          <div className='UiContentWrapper'>
+            <div className="UiApiKeySubtitle">
+              Choose your web search provider and add an API key for the <code>web_search</code> tool.
+            </div>
+
+            <div className="UiProviderList" style={{ marginTop: 12 }}>
+              {PROVIDERS.map((p) => (
+                <label
+                  key={p.id}
+                  className={`UiProviderOption ${provider === p.id ? "UiProviderOption--selected" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="web-search-provider"
+                    value={p.id}
+                    checked={provider === p.id}
+                    onChange={() => setProvider(p.id)}
+                    className="UiProviderRadio"
+                    disabled={props.busy}
+                  />
+                  <div className="UiProviderContent">
+                    <div className="UiProviderHeader">
+                      <span className="UiProviderName">{p.name}</span>
+                    </div>
+                    <div className="UiProviderDescription">{p.description}</div>
                   </div>
-                  <div className="UiProviderDescription">{p.description}</div>
-                </div>
-              </label>
-            ))}
+                </label>
+              ))}
+            </div>
+
+            <div className="UiApiKeySubtitle" style={{ marginTop: 12 }}>
+              {meta.helpText}{" "}
+              {meta.helpUrl ? (
+                <a
+                  href={meta.helpUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="UiLink"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const url = meta.helpUrl;
+                    if (!url) {
+                      return;
+                    }
+                    void window.openclawDesktop?.openExternal(url);
+                  }}
+                >
+                  Learn more ↗
+                </a>
+              ) : null}
+            </div>
+
+            {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
+
+            <div className="UiApiKeyInputRow">
+              <TextInput
+                type="password"
+                value={apiKey}
+                onChange={setApiKey}
+                placeholder={meta.placeholder}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={props.busy}
+              />
+            </div>
+
+            <div className="UiApiKeySpacer" aria-hidden="true" />
           </div>
-
-          <div className="UiApiKeySubtitle" style={{ marginTop: 12 }}>
-            {meta.helpText}{" "}
-            {meta.helpUrl ? (
-              <a
-                href={meta.helpUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="UiLink"
-                onClick={(e) => {
-                  e.preventDefault();
-                  const url = meta.helpUrl;
-                  if (!url) {
-                    return;
-                  }
-                  void window.openclawDesktop?.openExternal(url);
-                }}
-              >
-                Learn more ↗
-              </a>
-            ) : null}
-          </div>
-
-          {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
-
-          <div className="UiApiKeyInputRow">
-            <TextInput
-              type="password"
-              value={apiKey}
-              onChange={setApiKey}
-              placeholder={meta.placeholder}
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              disabled={props.busy}
-            />
-          </div>
-
-          <div className="UiApiKeySpacer" aria-hidden="true" />
-        </div>
 
         <div className="UiApiKeyButtonRow">
           <button

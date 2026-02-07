@@ -39,58 +39,61 @@ export function ObsidianConnectPage(props: {
         </div>
 
         <div className="UiApiKeyTitle">Connect Obsidian</div>
-        <div className="UiApiKeySubtitle">
-          Enable Obsidian vault automation via the bundled <code>obsidian-cli</code>.
-        </div>
 
-        <div className="UiSectionSubtitle">
-          Notes:
-          <ol>
-            <li>Select a vault below. We'll set it as the default for future commands.</li>
-            <li>
-              Connected means <code>obsidian-cli print-default --path-only</code> returns a vault
-              path that exists.
-            </li>
-          </ol>
-        </div>
-
-        <div className="UiApiKeyInputRow">
-          <div className="UiSectionSubtitle" style={{ marginBottom: 8 }}>
-            Vault
+        <div className="UiContentWrapper">
+          <div className="UiApiKeySubtitle">
+            Enable Obsidian vault automation via the bundled <code>obsidian-cli</code>.
           </div>
-          <select
-            className="UiInput"
-            disabled={props.busy || props.vaultsLoading || props.vaults.length === 0}
-            value={selected}
-            onChange={(e) => props.setSelectedVaultName(e.target.value)}
-          >
-            {props.vaults.length === 0 ? (
-              <option value="">
-                {props.vaultsLoading ? "Loading vaults..." : "No vaults found"}
-              </option>
-            ) : (
-              <>
-                <option value="" disabled>
-                  Select a vault…
-                </option>
-                {props.vaults.map((v) => (
-                  <option key={`${v.name}:${v.path}`} value={v.name}>
-                    {v.open ? `• ${v.name}` : v.name}
-                  </option>
-                ))}
-              </>
-            )}
-          </select>
-          {selected ? (
-            <div className="UiSectionSubtitle" style={{ marginTop: 8 }}>
-              Selected: <code>{selected}</code>
+
+          <div className="UiSectionSubtitle">
+            Notes:
+            <ol>
+              <li>Select a vault below. We'll set it as the default for future commands.</li>
+              <li>
+                Connected means <code>obsidian-cli print-default --path-only</code> returns a vault
+                path that exists.
+              </li>
+            </ol>
+          </div>
+
+          <div className="UiApiKeyInputRow">
+            <div className="UiSectionSubtitle" style={{ marginBottom: 8 }}>
+              Vault
             </div>
-          ) : null}
+            <select
+              className="UiInput"
+              disabled={props.busy || props.vaultsLoading || props.vaults.length === 0}
+              value={selected}
+              onChange={(e) => props.setSelectedVaultName(e.target.value)}
+            >
+              {props.vaults.length === 0 ? (
+                <option value="">
+                  {props.vaultsLoading ? "Loading vaults..." : "No vaults found"}
+                </option>
+              ) : (
+                <>
+                  <option value="" disabled>
+                    Select a vault…
+                  </option>
+                  {props.vaults.map((v) => (
+                    <option key={`${v.name}:${v.path}`} value={v.name}>
+                      {v.open ? `• ${v.name}` : v.name}
+                    </option>
+                  ))}
+                </>
+              )}
+            </select>
+            {selected ? (
+              <div className="UiSectionSubtitle" style={{ marginTop: 8 }}>
+                Selected: <code>{selected}</code>
+              </div>
+            ) : null}
+          </div>
+
+          {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
+
+          <div className="UiApiKeySpacer" aria-hidden="true" />
         </div>
-
-        {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
-
-        <div className="UiApiKeySpacer" aria-hidden="true" />
 
         <div className="UiApiKeyButtonRow">
           <button
