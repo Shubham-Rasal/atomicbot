@@ -90,7 +90,7 @@ export function TelegramUserPage(props: {
 
           {props.status ? <div className="UiSectionSubtitle">{props.status}</div> : null}
 
-          <div className="UiApiKeyInputRow">
+          <div className="UiApiKeyInputRow" style={{ marginBottom: 6 }}>
             <TextInput
               value={props.telegramUserId}
               onChange={props.setTelegramUserId}
