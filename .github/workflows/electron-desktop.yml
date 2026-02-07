@@ -20,7 +20,9 @@ concurrency:
 jobs:
   build-macos:
     runs-on: macos-14
-    timeout-minutes: 60
+    timeout-minutes: 90
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -119,16 +121,18 @@ jobs:
         working-directory: apps/electron-desktop
         run: npm run prepare:obsidian-cli:all
 
-      # Determine publish mode: --publish always for tags, --publish never otherwise.
+      # Determine if we should publish to GitHub Releases.
       - name: Determine publish mode
         id: publish-mode
         run: |
           if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            echo "flag=always" >> "$GITHUB_OUTPUT"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
           elif [[ "${{ inputs.publish }}" == "true" ]]; then
-            echo "flag=always" >> "$GITHUB_OUTPUT"
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "tag=v$(node -p "require('./apps/electron-desktop/package.json').version")" >> "$GITHUB_OUTPUT"
           else
-            echo "flag=never" >> "$GITHUB_OUTPUT"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
           fi
 
       # Write the App Store Connect API key to a temp file for notarytool.
@@ -153,28 +157,75 @@ jobs:
           ulimit -n 524288
           echo "After: soft=$(ulimit -Sn) hard=$(ulimit -Hn)"
 
+      # Build with --publish never. Uploads are handled separately via gh CLI
+      # to avoid electron-builder HTTP timeouts during long notarization waits.
       - name: Build with electron-builder
         working-directory: apps/electron-desktop
         run: |
           ulimit -n 524288
-          npx electron-builder --publish ${{ steps.publish-mode.outputs.flag }}
+          npx electron-builder --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Code signing: when CSC_LINK is empty, disable auto-discovery so the
-          # afterPack hook and electron-builder both skip signing gracefully.
           CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
           CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MACOS_CSC_LINK != '' && 'true' || 'false' }}
-          # Notarization (optional — only when signing secrets + notary keys are set).
-          # NOTARYTOOL_KEY is set via GITHUB_ENV in the "Write notary API key" step above
-          # (points to a temp .p8 file path, not the key content).
           NOTARIZE: ${{ secrets.NOTARYTOOL_KEY != '' && secrets.MACOS_CSC_LINK != '' && '1' || '' }}
           NOTARYTOOL_KEY_ID: ${{ secrets.NOTARYTOOL_KEY_ID }}
           NOTARYTOOL_ISSUER: ${{ secrets.NOTARYTOOL_ISSUER }}
 
+      # Generate latest-mac.yml for electron-updater (normally created by --publish always).
+      - name: Generate latest-mac.yml
+        working-directory: apps/electron-desktop/release
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('../package.json').version")
+          ZIP=$(ls -1 *-mac.zip | head -1)
+          SHA512=$(shasum -a 512 "$ZIP" | awk '{print $1}' | xxd -r -p | base64)
+          SIZE=$(stat -f%z "$ZIP")
+          RELEASE_DATE=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
+          cat > latest-mac.yml <<EOF
+          version: ${VERSION}
+          files:
+            - url: ${ZIP}
+              sha512: ${SHA512}
+              size: ${SIZE}
+          path: ${ZIP}
+          sha512: ${SHA512}
+          releaseDate: '${RELEASE_DATE}'
+          EOF
+          # Remove leading whitespace from heredoc indentation.
+          sed -i '' 's/^          //' latest-mac.yml
+          echo "Generated latest-mac.yml:"
+          cat latest-mac.yml
+
+      # Create draft GitHub Release and upload all artifacts via gh CLI.
+      # gh CLI handles large files reliably without the timeout issues of electron-builder.
+      - name: Publish to GitHub Releases
+        if: steps.publish-mode.outputs.publish == 'true'
+        working-directory: apps/electron-desktop/release
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.publish-mode.outputs.tag }}"
+
+          # Create draft release (or skip if it already exists).
+          gh release create "$TAG" --draft --title "$TAG" --generate-notes 2>/dev/null || true
+
+          # Upload all artifacts (zip, dmg, blockmap, latest-mac.yml).
+          for f in *.zip *.dmg *.blockmap latest-mac.yml; do
+            if [[ -f "$f" ]]; then
+              echo "Uploading: $f"
+              gh release upload "$TAG" "$f" --clobber
+            fi
+          done
+
+          echo "Draft release created: $TAG"
+          echo "Go to GitHub Releases to review and publish."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # Upload artifacts for manual dispatch builds (when not publishing to Releases).
       - name: Upload build artifacts
-        if: steps.publish-mode.outputs.flag == 'never'
+        if: steps.publish-mode.outputs.publish == 'false'
         uses: actions/upload-artifact@v4
         with:
           name: electron-desktop-macos-${{ runner.arch }}
