@@ -15,5 +15,4 @@ export {
   SpinningSplashLogo,
   SplashLogo,
   TextInput,
-  ToolbarButton,
 } from "./ui";

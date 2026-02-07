@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ActionButton, ButtonRow, Modal } from "../kit";
+import { Modal } from "../kit";
 import {
   useConnectorsStatus,
   disableConnector,
@@ -158,7 +158,6 @@ export function ConnectorsTab(props: {
   });
 
   const [activeModal, setActiveModal] = React.useState<ConnectorId | null>(null);
-  const [resetBusy, setResetBusy] = React.useState(false);
 
   const openModal = React.useCallback((id: ConnectorId) => {
     setActiveModal(id);
@@ -197,26 +196,6 @@ export function ConnectorsTab(props: {
     if (status === "disabled") return "UiSkillCard UiSkillCard--disabled";
     return "UiSkillCard";
   };
-
-  const resetAndClose = React.useCallback(async () => {
-    const api = window.openclawDesktop;
-    if (!api) {
-      props.onError("Desktop API not available");
-      return;
-    }
-    const ok = window.confirm(
-      "Reset and close will delete the app's local state (including onboarding + logs) and remove all Google Workspace authorizations from the keystore. Continue?"
-    );
-    if (!ok) return;
-    props.onError(null);
-    setResetBusy(true);
-    try {
-      await api.resetAndClose();
-    } catch (err) {
-      props.onError(String(err));
-      setResetBusy(false);
-    }
-  }, [props]);
 
   return (
     <div className="UiSettingsContentInner">
@@ -277,20 +256,6 @@ export function ConnectorsTab(props: {
           onDisabled={() => void handleDisabled("slack")}
         />
       </Modal>
-
-      {/* ── Danger zone (reset) ──────────────────────────────── */}
-      <section className="UiSettingsSection UiSettingsSection--danger" style={{ marginTop: 24 }}>
-        <div className="UiSectionTitle">Danger zone</div>
-        <div className="UiSectionSubtitle">
-          This will wipe the app's local state and remove all Google Workspace authorizations. The
-          app will then close.
-        </div>
-        <ButtonRow>
-          <ActionButton variant="primary" disabled={resetBusy} onClick={() => void resetAndClose()}>
-            {resetBusy ? "Resetting…" : "Reset and close"}
-          </ActionButton>
-        </ButtonRow>
-      </section>
     </div>
   );
 }

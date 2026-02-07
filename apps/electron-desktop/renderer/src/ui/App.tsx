@@ -16,7 +16,7 @@ import { SettingsIndexRedirect, SettingsPage, SettingsTab } from "./SettingsPage
 import { WelcomePage } from "./WelcomePage";
 import { ConsentScreen, type ConsentDesktopApi } from "./ConsentScreen";
 import { LoadingScreen } from "./LoadingScreen";
-import { Brand, ToolbarButton } from "./kit";
+import { Brand } from "./kit";
 import { GatewayRpcProvider } from "../gateway/context";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { initGatewayState } from "../store/slices/gatewaySlice";
@@ -53,115 +53,31 @@ function SidebarLayout({ state }: { state: Extract<GatewayState, { kind: "ready"
 }
 
 function Topbar() {
-  const api = window.openclawDesktop;
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement | null>(null);
   const brandIconUrl = React.useMemo(() => {
     // Renderer lives at renderer/dist/index.html; the app's assets are at ../../assets/
     return new URL("../../assets/icon-simple-splash.png", document.baseURI).toString();
   }, []);
 
-  React.useEffect(() => {
-    if (!menuOpen) {
-      return;
-    }
-    const onDown = (evt: MouseEvent) => {
-      const el = menuRef.current;
-      if (!el) {
-        setMenuOpen(false);
-        return;
-      }
-      const target = evt.target as Node | null;
-      if (target && el.contains(target)) {
-        return;
-      }
-      setMenuOpen(false);
-    };
-    const onKey = (evt: KeyboardEvent) => {
-      if (evt.key === "Escape") {
-        setMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [menuOpen]);
-
   return (
     <div className="UiAppTopbar">
       <Brand text="ATOMIC BOT" iconSrc={brandIconUrl} iconAlt="" />
-      <div className="UiAppTopbarCenter">
-        <div className="UiTabs" role="tablist" aria-label="Navigation">
-          <NavLink
-            to={routes.legacy}
-            role="tab"
-            className={({ isActive }) => `UiTab${isActive ? " UiTab-active" : ""}`}
-          >
-            Legacy
-          </NavLink>
-          <NavLink
-            to={routes.chat}
-            role="tab"
-            className={({ isActive }) => `UiTab${isActive ? " UiTab-active" : ""}`}
-          >
-            Chat
-          </NavLink>
-          <NavLink
-            to={routes.settings}
-            role="tab"
-            className={({ isActive }) => `UiTab${isActive ? " UiTab-active" : ""}`}
-          >
-            Settings
-          </NavLink>
-        </div>
-      </div>
-      <div className="UiAppTopbarActions">
-        <ToolbarButton
-          onClick={() => {
-            setMenuOpen((v) => !v);
-          }}
-        >
-          ⋯
-        </ToolbarButton>
 
-        {menuOpen ? (
-          <div className="UiMenu" ref={menuRef} role="menu" aria-label="Actions">
-            <button
-              className="UiMenuItem"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                void api?.openLogs();
-              }}
-            >
-              Open logs
-            </button>
-            <button
-              className="UiMenuItem"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                void api?.toggleDevTools();
-              }}
-            >
-              DevTools
-            </button>
-            <div className="UiMenuSep" role="separator" />
-            <button
-              className="UiMenuItem UiMenuItem-primary"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                void api?.retry();
-              }}
-            >
-              Retry
-            </button>
-          </div>
-        ) : null}
+      <div className="UiAppTopbarActions">
+        <NavLink to={routes.settings + "/other"} className="UiTab">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M7.46122 6.25282C7.29957 6.09668 7.08305 6.01029 6.85831 6.01224C6.63357 6.01419 6.41859 6.10434 6.25967 6.26326C6.10074 6.42218 6.0106 6.63716 6.00865 6.8619C6.00669 7.08664 6.09309 7.30316 6.24922 7.46482L10.7861 12.0017L6.24922 16.5385C6.16736 16.6176 6.10206 16.7122 6.05714 16.8168C6.01222 16.9213 5.98857 17.0338 5.98758 17.1476C5.98659 17.2614 6.00828 17.3743 6.05138 17.4796C6.09447 17.585 6.15812 17.6807 6.2386 17.7612C6.31908 17.8416 6.41478 17.9053 6.52012 17.9484C6.62546 17.9915 6.73833 18.0132 6.85214 18.0122C6.96595 18.0112 7.07842 17.9875 7.183 17.9426C7.28757 17.8977 7.38216 17.8324 7.46122 17.7505L11.9981 13.2137L16.5349 17.7505C16.6966 17.9067 16.9131 17.9931 17.1379 17.9911C17.3626 17.9892 17.5776 17.899 17.7365 17.7401C17.8954 17.5812 17.9856 17.3662 17.9875 17.1414C17.9895 16.9167 17.9031 16.7002 17.7469 16.5385L13.2101 12.0017L17.7469 7.46482C17.9031 7.30316 17.9895 7.08664 17.9875 6.8619C17.9856 6.63716 17.8954 6.42218 17.7365 6.26326C17.5776 6.10434 17.3626 6.01419 17.1379 6.01224C16.9131 6.01029 16.6966 6.09668 16.5349 6.25282L11.9981 10.7897L7.46122 6.25282Z"
+              fill="white"
+              fill-opacity="0.6"
+            />
+          </svg>
+        </NavLink>
       </div>
     </div>
   );

@@ -886,21 +886,15 @@ button:disabled {
 
 .UiAppTopbar {
   height: 56px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
   gap: 14px;
   padding: 0 16px;
   border-bottom: 1px solid rgba(230, 237, 243, 0.1);
   background: rgba(11, 15, 20, 0.55);
   backdrop-filter: blur(18px);
-}
-
-.UiAppTopbarCenter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 0;
 }
 
 .UiAppTopbarActions {
@@ -911,134 +905,29 @@ button:disabled {
   flex: 0 0 auto;
 }
 
-.UiTabs {
-  display: inline-flex;
-  gap: 0;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 999px;
-  border: 1px solid rgba(230, 237, 243, 0.12);
-  background: rgba(0, 0, 0, 0.2);
-  box-shadow:
-    0 18px 55px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
 .UiTab {
   appearance: none;
   border: 0;
   background: transparent;
-  color: rgba(230, 237, 243, 0.82);
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-size: 13px;
   cursor: pointer;
   text-decoration: none;
-  display: inline-flex;
   align-items: center;
+  justify-content: center;
   user-select: none;
   transition:
     background 140ms ease,
     color 140ms ease,
     transform 140ms ease;
+  display: flex;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  padding: 0;
 }
 
 .UiTab:hover {
-  color: rgba(230, 237, 243, 0.95);
   background: rgba(230, 237, 243, 0.06);
-}
-
-.UiTab-active {
-  background: var(--lime);
-  color: rgba(0, 0, 0, 0.86);
-  font-weight: 800;
-}
-
-.UiToolbarButton {
-  appearance: none;
-  border: 1px solid rgba(230, 237, 243, 0.14);
-  background: rgba(0, 0, 0, 0.18);
-  color: rgba(230, 237, 243, 0.92);
-  border-radius: 10px;
-  padding: 8px 10px;
-  font-size: 13px;
-  cursor: pointer;
-  transition:
-    background 120ms ease,
-    border-color 120ms ease;
-}
-
-.UiToolbarButton-primary {
-  border-color: rgba(194, 255, 64, 0.35);
-  background: rgba(194, 255, 64, 0.2);
-  color: rgba(0, 0, 0, 0.86);
-  font-weight: 800;
-}
-
-.UiToolbarButton:hover:enabled {
-  border-color: rgba(230, 237, 243, 0.22);
-  background: rgba(0, 0, 0, 0.26);
-}
-
-.UiToolbarButton-primary:hover:enabled {
-  border-color: rgba(194, 255, 64, 0.5);
-  background: rgba(194, 255, 64, 0.28);
-}
-
-.UiToolbarButton:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-
-.UiMenu {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  width: 190px;
-  padding: 8px;
-  border-radius: 14px;
-  border: 1px solid rgba(230, 237, 243, 0.14);
-  background: rgba(11, 15, 20, 0.78);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.55);
-  z-index: 20;
-}
-
-.UiMenuItem {
-  width: 100%;
-  text-align: left;
-  appearance: none;
-  border: 1px solid transparent;
-  background: transparent;
-  color: rgba(230, 237, 243, 0.92);
-  border-radius: 12px;
-  padding: 10px 10px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.UiMenuItem:hover {
-  background: rgba(230, 237, 243, 0.06);
-  border-color: rgba(230, 237, 243, 0.1);
-}
-
-.UiMenuItem-primary {
-  background: rgba(194, 255, 64, 0.16);
-  border-color: rgba(194, 255, 64, 0.26);
-  color: rgba(0, 0, 0, 0.86);
-  font-weight: 800;
-}
-
-.UiMenuItem-primary:hover {
-  background: rgba(194, 255, 64, 0.24);
-  border-color: rgba(194, 255, 64, 0.38);
-}
-
-.UiMenuSep {
-  height: 1px;
-  margin: 6px 2px;
-  background: rgba(230, 237, 243, 0.1);
 }
 
 .Card {

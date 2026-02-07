@@ -5,32 +5,34 @@ import { routes } from "../routes";
 
 export function OtherTab({ onError }: { onError: (msg: string | null) => void }) {
   const [launchAtStartup, setLaunchAtStartup] = React.useState(false);
-  const [signOutBusy, setSignOutBusy] = React.useState(false);
+  const [resetBusy, setResetBusy] = React.useState(false);
 
   const appVersion =
     typeof window !== "undefined" && window.openclawDesktop?.version
       ? window.openclawDesktop.version
       : "0.0.0";
 
-  const signOut = React.useCallback(async () => {
+  const resetAndClose = React.useCallback(async () => {
     const api = window.openclawDesktop;
     if (!api) {
       onError("Desktop API not available");
       return;
     }
     const ok = window.confirm(
-      "Sign out will reset the app's local state and remove authorizations. Continue?"
+      "Reset and close will delete the app's local state (including onboarding + logs) and remove all Google Workspace authorizations from the keystore. Continue?"
     );
     if (!ok) return;
     onError(null);
-    setSignOutBusy(true);
+    setResetBusy(true);
     try {
       await api.resetAndClose();
     } catch (err) {
       onError(String(err));
-      setSignOutBusy(false);
+      setResetBusy(false);
     }
   }, [onError]);
+
+  const api = window.openclawDesktop;
 
   return (
     <div className="UiSettingsContentInner">
@@ -47,6 +49,21 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
             Legacy
           </NavLink>
         </div>
+
+        <button
+          onClick={() => {
+            void api?.openLogs();
+          }}
+        >
+          Open logs
+        </button>
+        <button
+          onClick={() => {
+            void api?.toggleDevTools();
+          }}
+        >
+          DevTools
+        </button>
       </section>
 
       <section className="UiSettingsSection">
@@ -66,16 +83,16 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
         </div>
       </section>
 
-      <section className="UiSettingsSection UiSettingsSection--danger">
-        <div className="UiSectionTitle">Account</div>
+      {/* ── Danger zone (reset) ──────────────────────────────── */}
+      <section className="UiSettingsSection UiSettingsSection--danger" style={{ marginTop: 24 }}>
+        <div className="UiSectionTitle">Danger zone</div>
+        <div className="UiSectionSubtitle">
+          This will wipe the app's local state and remove all Google Workspace authorizations. The
+          app will then close.
+        </div>
         <ButtonRow>
-          <ActionButton
-            className="UiSettingsSignOutButton"
-            variant="primary"
-            disabled={signOutBusy}
-            onClick={() => void signOut()}
-          >
-            {signOutBusy ? "Signing out…" : "Sign Out"}
+          <ActionButton variant="primary" disabled={resetBusy} onClick={() => void resetAndClose()}>
+            {resetBusy ? "Resetting…" : "Reset and close"}
           </ActionButton>
         </ButtonRow>
       </section>
