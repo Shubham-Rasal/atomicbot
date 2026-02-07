@@ -6,6 +6,7 @@ import { useOptimisticSession } from "./optimisticSessionContext";
 import { routes } from "./routes";
 import { addToastError } from "./toast";
 import { SplashLogo } from "./kit";
+import { SessionSidebarItem } from "./SessionSidebarItem";
 
 type SessionsListResult = {
   ts: number;
@@ -127,7 +128,22 @@ export function Sidebar() {
     (key: string) => {
       void navigate(`${routes.chat}?session=${encodeURIComponent(key)}`, { replace: true });
     },
-    [navigate]
+    [navigate],
+  );
+
+  const handleDeleteSession = React.useCallback(
+    async (key: string) => {
+      try {
+        await gw.request("sessions.delete", { key, deleteTranscript: true });
+        await loadSessionsWithTitles(true);
+        if (currentSessionKey === key) {
+          void navigate(routes.chat, { replace: true });
+        }
+      } catch (err) {
+        addToastError(String(err));
+      }
+    },
+    [gw.request, loadSessionsWithTitles, currentSessionKey, navigate],
   );
 
   return (
@@ -155,16 +171,14 @@ export function Sidebar() {
                 ]
               : sessions
             ).map((s) => (
-              <li key={s.key}>
-                <button
-                  type="button"
-                  className={`UiChatSidebarSessionItem${currentSessionKey != null && currentSessionKey === s.key ? " UiChatSidebarSessionItem-active" : ""}`}
-                  onClick={() => handleSelectSession(s.key)}
-                  title={s.key}
-                >
-                  {s.title}
-                </button>
-              </li>
+              <SessionSidebarItem
+                key={s.key}
+                sessionKey={s.key}
+                title={s.title}
+                isActive={currentSessionKey != null && currentSessionKey === s.key}
+                onSelect={() => handleSelectSession(s.key)}
+                onDelete={handleDeleteSession}
+              />
             ))}
           </ul>
         )}
