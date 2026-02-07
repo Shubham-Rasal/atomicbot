@@ -1,7 +1,7 @@
 {
   "name": "atomicbot-desktop",
   "private": true,
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Atomic Bot makes things for you",
   "type": "commonjs",
   "main": "dist/main.js",
@@ -149,6 +149,7 @@
       "releaseType": "draft"
     },
     "mac": {
+      "artifactName": "Atomic-Bot-${version}-${arch}-mac.${ext}",
       "icon": "assets/icon.icns",
       "category": "public.app-category.productivity",
       "hardenedRuntime": true,
