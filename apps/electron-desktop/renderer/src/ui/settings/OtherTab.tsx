@@ -105,7 +105,7 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
               disabled={resetBusy}
               onClick={() => void resetAndClose()}
             >
-              {resetBusy ? "Resetting..." : "Reset and close"}
+              {resetBusy ? "Resetting..." : "Reset and sign out"}
             </button>
           </div>
         </div>
