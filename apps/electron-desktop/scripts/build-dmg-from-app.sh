@@ -56,7 +56,9 @@ cat > "$TMP_CONFIG" <<JSONEOF
   },
   "contents": [
     { "x": 200, "y": 250, "type": "file", "path": "$APP_PATH" },
-    { "x": 440, "y": 250, "type": "link", "path": "/Applications" }
+    { "x": 440, "y": 250, "type": "link", "path": "/Applications" },
+    { "x": 9999, "y": 9999, "type": "position", "path": ".background" },
+    { "x": 9999, "y": 9999, "type": "position", "path": ".VolumeIcon.icns" }
   ]
 }
 JSONEOF
