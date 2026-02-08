@@ -60,7 +60,7 @@ function Topbar() {
 
   return (
     <div className="UiAppTopbar">
-      <NavLink to={routes.chat}>
+      <NavLink to={routes.chat} className="UiAppNavLink">
         <Brand text="ATOMIC BOT" iconSrc={brandIconUrl} iconAlt="" />
       </NavLink>
 

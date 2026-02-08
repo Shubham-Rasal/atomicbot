@@ -920,6 +920,10 @@ button:disabled {
   backdrop-filter: blur(18px);
 }
 
+.UiAppNavLink {
+  cursor: pointer;
+}
+
 .UiAppTopbarActions {
   position: relative;
   display: flex;
