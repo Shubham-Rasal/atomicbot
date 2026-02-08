@@ -389,7 +389,6 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
                 media: {
                   image: { enabled: settings.image },
                   audio: { enabled: settings.audio },
-                  video: { enabled: false },
                 },
               },
             },
