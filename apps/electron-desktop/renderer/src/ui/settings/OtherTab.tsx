@@ -109,9 +109,85 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
           {/*</>*/}
 
           <div className="UiSettingsOtherRow">
+            <span className="UiSettingsOtherRowLabel">License</span>
+            <button
+              type="button"
+              className="UiSettingsOtherLink"
+              onClick={() =>
+                void api?.openExternal(
+                  "https://polyformproject.org/licenses/noncommercial/1.0.0"
+                )
+              }
+            >
+              PolyForm Noncommercial 1.0.0
+            </button>
+          </div>
+
+          <div className="UiSettingsOtherRow">
             <NavLink to={routes.legacy} className="UiSettingsOtherLink">
               Legacy
             </NavLink>
+          </div>
+        </div>
+      </section>
+
+      {/* About */}
+      <section className="UiSettingsOtherSection">
+        <h3 className="UiSettingsOtherSectionTitle">About</h3>
+        <div className="UiSettingsOtherCard">
+          <div className="UiSettingsOtherRow">
+            <span className="UiSettingsOtherRowLabel">&copy; {new Date().getFullYear()} AtomicBot</span>
+          </div>
+          <div className="UiSettingsOtherRow">
+            <button
+              type="button"
+              className="UiSettingsOtherLink"
+              onClick={() =>
+                void api?.openExternal("https://github.com/AtomicBot-ai/atomicbot")
+              }
+            >
+              GitHub
+            </button>
+          </div>
+          <div className="UiSettingsOtherRow">
+            <button
+              type="button"
+              className="UiSettingsOtherLink"
+              onClick={() => void api?.openExternal("https://atomicbot.ai")}
+            >
+              Website
+            </button>
+          </div>
+          <div className="UiSettingsOtherRow">
+            <button
+              type="button"
+              className="UiSettingsOtherLink"
+              onClick={() => void api?.openExternal("https://x.com/atomicbot_ai")}
+            >
+              X (Twitter)
+            </button>
+          </div>
+          <div className="UiSettingsOtherRow">
+            <button
+              type="button"
+              className="UiSettingsOtherLink"
+              onClick={() =>
+                void api?.openExternal("https://www.instagram.com/atomicbot.ai/")
+              }
+            >
+              Instagram
+            </button>
+          </div>
+          <div className="UiSettingsOtherRow">
+            <button
+              type="button"
+              className="UiSettingsOtherLink"
+              onClick={() =>
+                void api?.openExternal("https://discord.gg/2TXafRV69m")
+              }
+            >
+              Discord
+            </button>
           </div>
         </div>
       </section>
