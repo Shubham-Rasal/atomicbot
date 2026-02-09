@@ -2462,6 +2462,25 @@ pre {
 .UiModalContent {
   overflow-y: auto;
   flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #ffffff26 transparent;
+}
+
+.UiModalContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.UiModalContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.UiModalContent::-webkit-scrollbar-thumb {
+  background: #ffffff26;
+  border-radius: 1000px;
+}
+
+.UiModalContent::-webkit-scrollbar-thumb:hover {
+  background: #ffffff40;
 }
 
 @keyframes uiModalSlideUp {
