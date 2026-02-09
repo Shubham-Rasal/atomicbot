@@ -104,7 +104,21 @@ export function GogPage(props: {
         <div className="UiSectionTitle">Google Workspace</div>
         <div className="UiContentWrapper">
           <div>
-            <div className="UiSectionSubtitle">Get your email address from the Google</div>
+            <div className="UiSectionSubtitle">Get your email address from the Google {" "}
+              <a
+                href="https://accounts.google.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="UiLink"
+                onClick={(e) => {
+                  e.preventDefault();
+                  void window.openclawDesktop?.openExternal('https://accounts.google.com/');
+                }}
+              >
+                Open Google ↗
+              </a>
+
+            </div>
             {/*{connected ? (*/}
             {/*  <div className="UiGoogleWorkspaceConnected" aria-label="Connected">*/}
             {/*    ✓ Connected*/}
