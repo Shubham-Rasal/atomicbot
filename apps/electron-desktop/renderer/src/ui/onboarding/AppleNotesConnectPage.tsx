@@ -1,6 +1,6 @@
 import React from "react";
 
-import { GlassCard, HeroPageLayout, PrimaryButton, SecondaryButton } from "../kit";
+import { GlassCard, HeroPageLayout, PrimaryButton } from "../kit";
 
 export function AppleNotesConnectPage(props: {
   status: string | null;
@@ -51,8 +51,13 @@ export function AppleNotesConnectPage(props: {
             Back
           </button>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <PrimaryButton size={"sm"} disabled={props.busy} onClick={props.onCheckAndEnable}>
-              Connect
+            <PrimaryButton
+              size={"sm"}
+              disabled={props.busy}
+              loading={props.busy}
+              onClick={props.onCheckAndEnable}
+            >
+              {props.busy ? "Connecting..." : "Connect"}
             </PrimaryButton>
           </div>
         </div>

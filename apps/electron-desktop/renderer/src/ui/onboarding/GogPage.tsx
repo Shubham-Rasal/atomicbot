@@ -80,13 +80,19 @@ export function GogPage(props: {
   );
   const servicesCsv = selectedServices.join(",");
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const onConnect = React.useCallback(async () => {
     if (errorText) {
       setErrorText("");
     }
     const account = props.gogAccount.trim();
     if (!account) {
-      setErrorText("Please enter your Gmail Address to continue");
+      setErrorText("Please enter your mail Address to continue");
+      return;
+    }
+    if (!emailRegex.test(account)) {
+      setErrorText("Please enter a valid email address");
       return;
     }
     if (!servicesCsv) {
@@ -147,7 +153,7 @@ export function GogPage(props: {
                 <div className="UiBannerTitle">Temporary Google sign-in notice</div>
                 <div className="UiBannerSubtitle">
                   We’re completing Google’s verification, so there’s one extra step. To continue,
-                  click Advanced, then Go to Atomic Bot and allow requested permissions.
+                  click Advanced, then Go to well-pin and allow requested permissions.
                 </div>
               </div>
             </div>
