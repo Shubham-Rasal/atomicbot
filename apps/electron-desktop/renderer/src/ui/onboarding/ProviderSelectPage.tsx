@@ -62,7 +62,7 @@ export function ProviderSelectPage(props: {
               <div className="UiProviderContent">
                 <div className="UiProviderHeader">
                   <span className="UiProviderName">{provider.name}</span>
-                  {provider.recommended && <span className="UiProviderBadge">recommended</span>}
+                  {provider.recommended && <span className="UiProviderBadge">Recommended</span>}
                   {provider.popular && <span className="UiProviderBadgePopular">Popular</span>}
                 </div>
                 <div className="UiProviderDescription">{provider.description}</div>
