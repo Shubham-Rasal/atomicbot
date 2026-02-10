@@ -186,28 +186,13 @@ function SkillCta({
   if (status === "connected") {
     return (
       <div className="UiSkillConnectButtonContainer">
-        <div className="UiSkillConnectButton UiSkillConnectButtonConfigure">Connected</div>
         <button
           type="button"
-          className="UiSkillConnectButton UiSkillConnectButtonConfigure UiSkillConnectButtonCircle"
-          aria-label="Connected — click to configure"
           onClick={onSettings}
+          aria-label="Connected — click to configure"
+          className="UiSkillConnectButton UiSkillConnectButtonConfigure"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={20}
-            height={20}
-            fill="none"
-            viewBox="0 0 20 20"
-          >
-            <path
-              stroke="#fff"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.08"
-              d="M10 10zM5 9.99zM15 10z"
-            />
-          </svg>
+          Edit
         </button>
       </div>
     );
