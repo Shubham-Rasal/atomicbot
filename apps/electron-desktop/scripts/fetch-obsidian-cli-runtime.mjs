@@ -240,7 +240,7 @@ async function main() {
     (process.env.OBSIDIAN_CLI_REPO && String(process.env.OBSIDIAN_CLI_REPO).trim()) ||
     "Yakitrak/obsidian-cli";
   const tag =
-    (process.env.OBSIDIAN_CLI_TAG && String(process.env.OBSIDIAN_CLI_TAG).trim()) || "latest";
+    (process.env.OBSIDIAN_CLI_TAG && String(process.env.OBSIDIAN_CLI_TAG).trim()) || "v0.2.3";
   const apiUrl =
     tag === "latest"
       ? `https://api.github.com/repos/${repo}/releases/latest`
