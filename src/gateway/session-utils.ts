@@ -168,21 +168,9 @@ export function deriveSessionTitle(
   if (entry.subject?.trim()) {
     return entry.subject.trim();
   }
-
   if (firstUserMessage?.trim()) {
-    // Strip gateway-injected markers so derived titles show the user's own text.
-    const cleaned = firstUserMessage
-      .replace(/\[media attached(?:\s+\d+\/\d+)?:\s*[^\]]+\]/g, "")
-      .replace(/\[Attached:\s*[^\]]+\]/g, "")
-      .replace(
-        /To send an image back, prefer the message tool \(media\/path\/filePath\)\.[^\n]*/g,
-        "",
-      )
-      .replace(/<file\b[^>]*>[\s\S]*?(<\/file>|$)/g, "");
-    const normalized = cleaned.replace(/\s+/g, " ").trim();
-    if (normalized) {
-      return truncateTitle(normalized, DERIVED_TITLE_MAX_LEN);
-    }
+    // Return raw text (capped at 1000 chars); client-side UI handles sanitization and truncation.
+    return firstUserMessage.slice(0, 1000);
   }
 
   if (entry.sessionId) {
@@ -702,6 +690,11 @@ export function listSessionsFromStore(params: {
     sessions = sessions.slice(0, limit);
   }
 
+  // When multiple agent stores are combined, storePath is "(multiple)" which breaks
+  // transcript file resolution (path.dirname yields "."). Pass undefined so the
+  // resolver falls back to using the absolute sessionFile path directly.
+  const effectiveStorePath = storePath === "(multiple)" ? undefined : storePath;
+
   const finalSessions: GatewaySessionRow[] = sessions.map((s) => {
     const { entry, ...rest } = s;
     let derivedTitle: string | undefined;
@@ -710,7 +703,7 @@ export function listSessionsFromStore(params: {
       if (includeDerivedTitles) {
         const firstUserMsg = readFirstUserMessageFromTranscript(
           entry.sessionId,
-          storePath,
+          effectiveStorePath,
           entry.sessionFile,
         );
         derivedTitle = deriveSessionTitle(entry, firstUserMsg);
@@ -718,7 +711,7 @@ export function listSessionsFromStore(params: {
       if (includeLastMessage) {
         const lastMsg = readLastMessagePreviewFromTranscript(
           entry.sessionId,
-          storePath,
+          effectiveStorePath,
           entry.sessionFile,
         );
         if (lastMsg) {

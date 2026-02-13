@@ -37,7 +37,7 @@ function parseUserMessageWithAttachments(text: string): {
   const markerRe = /\[(?:media attached(?:\s+\d+\/\d+)?|Attached):\s*([^\]]+)\]/g;
   let match: RegExpExecArray | null;
   while ((match = markerRe.exec(text)) !== null) {
-    const part = match[1]!.trim();
+    const part = match[1].trim();
     // Skip count-only markers like "[media attached: 2 files]"
     if (/^\d+\s+files?$/.test(part)) {
       continue;
@@ -54,9 +54,13 @@ function parseUserMessageWithAttachments(text: string): {
     }
   }
 
-  // Strip all attachment markers, <file> tags, and the media-reply hint injected
-  // by the gateway to recover the original user text regardless of marker position.
+  // Strip all attachment markers, <file> tags, the media-reply hint injected
+  // by the gateway, and inbound-meta untrusted context blocks (conversation info,
+  // sender, thread starter, replied message, forwarded context, chat history)
+  // to recover the original user text regardless of marker position.
   let displayText = text
+    .replace(/^(?:[^\n]*\(untrusted(?:\s+metadata|,\s+for context)\):\n```json\n[\s\S]*?\n```\s*)+(?:\[(?:[A-Za-z]{3}\s+)?\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}[^\]]*\]\s*)?/, "")
+    .replace(/^\[(?:[A-Za-z]{3}\s+)?\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}[^\]]*\]\s*/, "")
     .replace(/\[media attached(?:\s+\d+\/\d+)?:\s*[^\]]+\]/g, "")
     .replace(/\[Attached:\s*[^\]]+\]/g, "")
     .replace(
@@ -64,6 +68,7 @@ function parseUserMessageWithAttachments(text: string): {
       ""
     )
     .replace(/<file\b[^>]*>[\s\S]*?(<\/file>|$)/g, "")
+    .replace(/^\s*\[message_id:\s*[^\]]+\]\s*$/gm, "")
     .trim();
 
   return { displayText, fileAttachments };
@@ -157,7 +162,7 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
 
   /** First user message in history that matches optimistic text; used for seamless handoff. */
   const matchingFirstUserFromHistory = React.useMemo(() => {
-    if (optimisticFirstMessage === null) return null;
+    if (optimisticFirstMessage === null) {return null;}
     const userMsg = messages.find(
       (m) => m.role === "user" && m.text.startsWith(optimisticFirstMessage)
     );
@@ -295,7 +300,7 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
           const parsedUser = m.role === "user" ? parseUserMessageWithAttachments(m.text) : null;
           const hasParsedFileAttachments =
             parsedUser != null && parsedUser.fileAttachments.length > 0;
-          const messageText = hasParsedFileAttachments ? parsedUser!.displayText : m.text;
+          const messageText = parsedUser ? parsedUser.displayText : m.text;
           const showAttachmentsBlock = attachmentsToShow.length > 0 || hasParsedFileAttachments;
           return (
             <div key={getMessageKey(m)} className={`UiChatRow UiChatRow-${m.role}`}>
@@ -318,7 +323,7 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
                       }
                       const mimeType = att.mimeType ?? "application/octet-stream";
                       const skipFile = ["toolCall", "thinking"].includes(att.type);
-                      if (skipFile) return null;
+                      if (skipFile) {return null;}
                       return (
                         <ChatAttachmentCard
                           key={`${m.id}-att-${idx}`}
@@ -328,7 +333,7 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
                       );
                     })}
                     {hasParsedFileAttachments &&
-                      parsedUser!.fileAttachments.map((att, idx) => (
+                      parsedUser.fileAttachments.map((att, idx) => (
                         <ChatAttachmentCard
                           key={`${m.id}-parsed-${idx}`}
                           fileName={att.fileName}

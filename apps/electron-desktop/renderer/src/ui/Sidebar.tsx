@@ -30,28 +30,39 @@ type SessionWithTitle = {
 const SESSIONS_LIST_LIMIT = 50;
 const TITLE_MAX_LEN = 48;
 
-/** Extract only the message text from derivedTitle, e.g. "[Fri 2026-02-06 …] привет [message_id:…" → "привет". */
-function messageTextFromDerivedTitle(derivedTitle: string | undefined): string {
+/**
+ * Sanitize raw derivedTitle: strip inbound-meta untrusted context blocks,
+ * envelope date headers, attachment markers, media hints, file tags,
+ * and message_id hints to recover the original user text for display.
+ */
+function cleanDerivedTitle(derivedTitle: string | undefined): string {
   const raw = derivedTitle?.trim();
+  console.log("cleanDerivedTitle>>>", raw);
   if (!raw) {
     return "";
   }
-  let s = raw;
-  const afterBracket = s.indexOf("] ");
-  if (afterBracket >= 0) {
-    s = s.slice(afterBracket + 2);
-  }
-  const beforeMeta = s.indexOf(" [");
-  if (beforeMeta >= 0) {
-    s = s.slice(0, beforeMeta);
-  }
-  return s.trim();
+  return raw
+    .replace(
+      /^(?:[^\n]*\(untrusted(?:\s+metadata|,\s+for context)\):\n```json\n[\s\S]*?\n```\s*)+(?:\[(?:[A-Za-z]{3}\s+)?\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}[^\]]*\]\s*)?/,
+      "",
+    )
+    .replace(/^\[(?:[A-Za-z]{3}\s+)?\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}[^\]]*\]\s*/, "")
+    .replace(/\[media attached(?:\s+\d+\/\d+)?:\s*[^\]]+\]/g, "")
+    .replace(/\[Attached:\s*[^\]]+\]/g, "")
+    .replace(
+      /To send an image back, prefer the message tool \(media\/path\/filePath\)\. If you must inline, use MEDIA:https:\/\/example\.com\/image\.jpg \(spaces ok, quote if needed\) or a safe relative path like MEDIA:\.\/image\.jpg\. Avoid absolute paths \(MEDIA:\/\.\.\.\) and ~ paths — they are blocked for security\. Keep caption in the text body\./g,
+      "",
+    )
+    .replace(/<file\b[^>]*>[\s\S]*?(<\/file>|$)/g, "")
+    .replace(/^\s*\[message_id:\s*[^\]]+\]\s*$/gm, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function titleFromRow(row: SessionsListResult["sessions"][number]): string {
-  const raw = messageTextFromDerivedTitle(row.derivedTitle);
-  if (raw) {
-    return raw.length > TITLE_MAX_LEN ? `${raw.slice(0, TITLE_MAX_LEN)}…` : raw;
+  const cleaned = cleanDerivedTitle(row.derivedTitle);
+  if (cleaned) {
+    return cleaned.length > TITLE_MAX_LEN ? `${cleaned.slice(0, TITLE_MAX_LEN)}…` : cleaned;
   }
   return "New Chat";
 }
