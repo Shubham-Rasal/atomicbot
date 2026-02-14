@@ -74,6 +74,70 @@
   line-height: 1.5;
 }
 
+/* Code-block wrapper with copy button overlay */
+.UiMarkdownCodeBlock {
+  position: relative;
+  margin: 12px 0;
+}
+
+.UiMarkdownCodeBlock pre {
+  margin: 0;
+  padding-top: 32px;
+}
+
+.UiMarkdownCodeBlockLang {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: lowercase;
+  letter-spacing: 0.3px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  pointer-events: none;
+}
+
+.UiMarkdownCopyCodeBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  appearance: none;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.4);
+  padding: 4px 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0;
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.UiMarkdownCodeBlock:hover .UiMarkdownCopyCodeBtn {
+  opacity: 1;
+}
+
+.UiMarkdownCopyCodeBtn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.UiMarkdownCopyCodeBtn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
 .UiMarkdown blockquote {
   margin: 12px 0;
   padding: 8px 14px;

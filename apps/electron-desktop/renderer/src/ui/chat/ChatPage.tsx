@@ -12,12 +12,45 @@ import {
   type ChatAttachmentInput,
 } from "@store/slices/chatSlice";
 import type { GatewayState } from "@main/types";
+import { CopyIcon, CheckIcon } from "@shared/kit/icons";
 import { ChatComposer, type ChatComposerRef } from "./components/ChatComposer";
 import { ChatMessageList } from "./components/ChatMessageList";
 import { useOptimisticSession } from "./hooks/optimisticSessionContext";
 import { useChatStream } from "./hooks/useChatStream";
 import { addToastError } from "@shared/toast";
 import ct from "./ChatTranscript.module.css";
+
+/** Extract plain text from React children tree (for copying code content). */
+function extractText(node: React.ReactNode): string {
+  if (typeof node === "string") {return node;}
+  if (typeof node === "number") {return String(node);}
+  if (node == null || typeof node === "boolean") {return "";}
+  if (Array.isArray(node)) {return node.map(extractText).join("");}
+  if (typeof node === "object" && "props" in node) {
+    return extractText((node as React.ReactElement).props.children);
+  }
+  return "";
+}
+
+/** Copy-to-clipboard button rendered inside code block header. */
+function CopyCodeButton({ code }: { code: string }) {
+  const [copied, setCopied] = React.useState(false);
+  return (
+    <button
+      type="button"
+      className="UiMarkdownCopyCodeBtn"
+      onClick={() => {
+        void navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      aria-label={copied ? "Copied" : "Copy code"}
+    >
+      {copied ? <CheckIcon /> : <CopyIcon />}
+      {copied ? "Copied!" : "Copy code"}
+    </button>
+  );
+}
 
 export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kind: "ready" }> }) {
   const [searchParams] = useSearchParams();
@@ -47,7 +80,7 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
   const composerRef = React.useRef<ChatComposerRef | null>(null);
 
-  /** Override markdown links to open in the system browser instead of Electron. */
+  /** Override markdown components: links open in system browser, code blocks get a copy button. */
   const markdownComponents: Components = React.useMemo(
     () => ({
       a: ({ href, children, ...rest }) => (
@@ -64,6 +97,25 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
           {children}
         </a>
       ),
+      pre: ({ children, ...rest }) => {
+        let lang = "";
+        const child = React.Children.toArray(children)[0];
+        if (React.isValidElement(child) && child.props) {
+          const className = (child.props as Record<string, unknown>).className;
+          if (typeof className === "string") {
+            const match = className.match(/language-(\S+)/);
+            if (match) {lang = match[1];}
+          }
+        }
+        const code = extractText(children).replace(/\n$/, "");
+        return (
+          <div className="UiMarkdownCodeBlock">
+            {lang ? <span className="UiMarkdownCodeBlockLang">{lang}</span> : null}
+            <CopyCodeButton code={code} />
+            <pre {...rest}>{children}</pre>
+          </div>
+        );
+      },
     }),
     [],
   );
