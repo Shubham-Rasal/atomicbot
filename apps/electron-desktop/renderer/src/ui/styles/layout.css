@@ -27,7 +27,7 @@
   justify-content: space-between;
   gap: 14px;
   padding: 0 16px;
-  border-bottom: 1px solid rgba(230, 237, 243, 0.1);
+  border-bottom: 1px solid var(--border-light);
   background: rgba(11, 15, 20, 0.55);
   backdrop-filter: blur(18px);
 }
@@ -115,7 +115,7 @@ pre {
   padding: 12px 12px;
   border-radius: var(--radius-lg);
   background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(230, 237, 243, 0.1);
+  border: 1px solid var(--border-light);
   max-height: 340px;
   overflow: auto;
   white-space: pre-wrap;

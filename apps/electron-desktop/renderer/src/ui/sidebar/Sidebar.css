@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-10);
   padding: 8px 10px;
   margin: 12px 6px 0;
   color: #ffffff;
@@ -31,7 +31,7 @@
 }
 
 .UiChatSidebarNewSession:hover {
-  background: rgba(230, 237, 243, 0.06);
+  background: var(--border-subtle);
 }
 
 .UiChatSidebarSessions {
@@ -84,7 +84,7 @@
   align-items: center;
   gap: 8px;
   align-self: stretch;
-  border-radius: 10px;
+  border-radius: var(--radius-10);
   border: none;
   background: transparent;
   color: var(--text);
@@ -100,11 +100,11 @@
 }
 
 .UiChatSidebarSessionItem:hover {
-  background: rgba(230, 237, 243, 0.06);
+  background: var(--border-subtle);
 }
 
 .UiChatSidebarSessionItem-active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-overlay);
 }
 
 .UiChatSidebarFooter {
@@ -119,7 +119,7 @@
   gap: 8px;
   height: 32px;
   padding: 0 10px;
-  border-radius: 10px;
+  border-radius: var(--radius-10);
   color: var(--muted);
   font-size: 14px;
   text-decoration: none;
@@ -129,7 +129,7 @@
 }
 
 .UiChatSidebarSettings:hover {
-  background: rgba(230, 237, 243, 0.06);
+  background: var(--border-subtle);
   color: var(--text);
 }
 

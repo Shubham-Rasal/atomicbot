@@ -17,6 +17,14 @@
   --surface-secondary: #292929;
   --surface-tertiary: #343434;
   --surface-hover: rgba(255, 255, 255, 0.05);
+  --surface-overlay-subtle: rgba(255, 255, 255, 0.06);
+  --surface-overlay: rgba(255, 255, 255, 0.08);
+  --surface-overlay-strong: rgba(255, 255, 255, 0.12);
+
+  /* ── backgrounds ─── */
+  --bg-base: #1e1e1e;
+  --bg-card: #1d1d1d;
+  --bg-elevated: #2c2c2c;
 
   /* ── semantic colors ─── */
   --success: #38bb58;
@@ -24,6 +32,11 @@
   --warning: #ff7a00;
   --info: #0d6fff;
   --lime-soft: #c4ff47;
+
+  /* ── border variants ─── */
+  --border-subtle: rgba(230, 237, 243, 0.06);
+  --border-light: rgba(230, 237, 243, 0.1);
+  --text-secondary: rgba(230, 237, 243, 0.7);
 
   /* ── spacing scale ─── */
   --spacing-xs: 4px;
@@ -47,6 +60,9 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 999px;
+  --radius-10: 10px;
+  --radius-14: 14px;
+  --radius-18: 18px;
 
   /* ── transitions ─── */
   --transition-fast: 120ms ease;

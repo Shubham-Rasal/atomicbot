@@ -201,7 +201,7 @@
   top: 50%;
   left: 50%;
   transform: translateY(-50%) translateX(-50%);
-  background-color: #1e1e1e;
+  background-color: var(--bg-base);
   border-radius: 50%;
 }
 
@@ -308,7 +308,7 @@
   padding: 12px 12px;
   transition: border-color 0.15s ease;
   background:
-    linear-gradient(#2c2c2c, #2c2c2c) padding-box,
+    linear-gradient(var(--bg-elevated), var(--bg-elevated)) padding-box,
     linear-gradient(
         150deg,
         rgba(255, 255, 255, 0.24) 0%,
@@ -375,7 +375,7 @@
 }
 
 .UiSkillIcon--apple {
-  background: linear-gradient(135deg, rgba(230, 237, 243, 0.16), rgba(230, 237, 243, 0.06));
+  background: linear-gradient(135deg, rgba(230, 237, 243, 0.16), var(--border-subtle));
 }
 
 .UiSkillIcon--reminders {
@@ -415,7 +415,7 @@
 }
 
 .UiSkillIcon--signal {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(255, 255, 255, 0.06));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), var(--surface-overlay-subtle));
 }
 
 .UiSkillIcon--imessage {
@@ -423,7 +423,7 @@
 }
 
 .UiSkillIcon--matrix {
-  background: linear-gradient(135deg, rgba(11, 189, 139, 0.22), rgba(230, 237, 243, 0.06));
+  background: linear-gradient(135deg, rgba(11, 189, 139, 0.22), var(--border-subtle));
 }
 
 .UiSkillIcon--msteams {
@@ -431,7 +431,7 @@
 }
 
 .UiSkillIcon--sag {
-  background: rgba(230, 237, 243, 0.06);
+  background: var(--border-subtle);
 }
 
 .UiSkillName {
@@ -571,7 +571,7 @@
   grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
   border: 1px solid #ffffff14;
-  border-radius: 18px;
+  border-radius: var(--radius-18);
   margin-top: 8px;
 }
 
@@ -596,8 +596,8 @@
 
 .UiGoogleWorkspaceDetails {
   margin-top: 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(230, 237, 243, 0.1);
+  border-radius: var(--radius-14);
+  border: 1px solid var(--border-light);
   background: rgba(0, 0, 0, 0.2);
   padding: 10px 12px;
 }
@@ -643,7 +643,7 @@
   padding: 2px 8px;
   border-radius: var(--radius-full);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-overlay);
   color: rgba(255, 255, 255, 0.8);
   flex-shrink: 0;
 }

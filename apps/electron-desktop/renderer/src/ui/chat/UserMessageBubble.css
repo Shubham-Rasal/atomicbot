@@ -6,9 +6,9 @@
 .UiChatBubble-user {
   max-width: min(600px, 80%);
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-14);
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-overlay);
 }
 
 .UiChatBubble-user .UiChatBubbleMeta {

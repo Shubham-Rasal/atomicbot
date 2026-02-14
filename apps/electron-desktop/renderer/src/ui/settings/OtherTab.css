@@ -46,7 +46,7 @@
 }
 
 .UiSettingsOtherRow + .UiSettingsOtherRow {
-  border-top: 1px solid #1e1e1e;
+  border-top: 1px solid var(--bg-base);
 }
 
 .UiSettingsOtherRowLabel {
@@ -269,7 +269,7 @@
   line-height: 16px;
   color: #ff453a;
   background: rgba(255, 69, 58, 0.08);
-  border-top: 1px solid #1e1e1e;
+  border-top: 1px solid var(--bg-base);
   word-break: break-word;
 }
 
@@ -278,7 +278,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  border-top: 1px solid #1e1e1e;
+  border-top: 1px solid var(--bg-base);
 }
 
 .UiSettingsConfigSaveButton {
