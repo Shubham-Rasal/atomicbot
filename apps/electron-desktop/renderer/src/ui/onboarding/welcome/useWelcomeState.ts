@@ -4,7 +4,7 @@ import { useGatewayRpc } from "../../../gateway/context";
 import { useAppDispatch } from "../../../store/hooks";
 import { setOnboarded } from "../../../store/slices/onboardingSlice";
 import type { GatewayState } from "../../../../../src/main/types";
-import { routes } from "../../routes";
+import { routes } from "../../app/routes";
 import type { Provider } from "../ProviderSelectPage";
 import { useWelcomeApiKey } from "./useWelcomeApiKey";
 import { useWelcomeAppleNotes } from "./useWelcomeAppleNotes";

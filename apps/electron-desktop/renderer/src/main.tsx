@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { HashRouter } from "react-router-dom";
-import { App } from "./ui/App";
+import { App } from "./ui/app/App";
 import { Toaster } from "./ui/shared/Toaster";
 import { UpdateBanner } from "./ui/updates/UpdateBanner";
 import { WhatsNewModal } from "./ui/updates/WhatsNewModal";

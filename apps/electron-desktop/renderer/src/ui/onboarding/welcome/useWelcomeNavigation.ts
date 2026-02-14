@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import type { NavigateFunction } from "react-router-dom";
-import { routes } from "../../routes";
+import { routes } from "../../app/routes";
 
 /**
  * All navigation callbacks for the welcome/onboarding flow.

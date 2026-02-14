@@ -9,23 +9,23 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
-import { ChatPage } from "./chat/ChatPage";
-import { StartChatPage } from "./chat/StartChatPage";
-import { Sidebar } from "./sidebar/Sidebar";
-import { SettingsIndexRedirect, SettingsPage, SettingsTab } from "./settings/SettingsPage";
-import { TerminalPage } from "./terminal/TerminalPage";
-import { WelcomePage } from "./onboarding/WelcomePage";
-import { getDesktopApiOrNull } from "../ipc/desktopApi";
-import { ConsentScreen, type ConsentDesktopApi } from "./onboarding/ConsentScreen";
-import { LoadingScreen } from "./onboarding/LoadingScreen";
-import { Brand } from "./shared/kit";
-import { GatewayRpcProvider } from "../gateway/context";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { initGatewayState } from "../store/slices/gatewaySlice";
-import { loadOnboardingFromStorage } from "../store/slices/onboardingSlice";
-import type { GatewayState } from "../../../src/main/types";
+import { ChatPage } from "../chat/ChatPage";
+import { StartChatPage } from "../chat/StartChatPage";
+import { Sidebar } from "../sidebar/Sidebar";
+import { SettingsIndexRedirect, SettingsPage, SettingsTab } from "../settings/SettingsPage";
+import { TerminalPage } from "../terminal/TerminalPage";
+import { WelcomePage } from "../onboarding/WelcomePage";
+import { getDesktopApiOrNull } from "../../ipc/desktopApi";
+import { ConsentScreen, type ConsentDesktopApi } from "../onboarding/ConsentScreen";
+import { LoadingScreen } from "../onboarding/LoadingScreen";
+import { Brand } from "../shared/kit";
+import { GatewayRpcProvider } from "../../gateway/context";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { initGatewayState } from "../../store/slices/gatewaySlice";
+import { loadOnboardingFromStorage } from "../../store/slices/onboardingSlice";
+import type { GatewayState } from "../../../../src/main/types";
 import { isBootstrapPath, routes } from "./routes";
-import { OptimisticSessionProvider, OptimisticSessionSync } from "./chat/optimisticSessionContext";
+import { OptimisticSessionProvider, OptimisticSessionSync } from "../chat/optimisticSessionContext";
 import { ExecApprovalOverlay } from "./ExecApprovalModal";
 
 function ChatRoute({ state }: { state: Extract<GatewayState, { kind: "ready" }> }) {

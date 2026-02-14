@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate, useSearchParams } from "react-router
 import { useGatewayRpc } from "../../gateway/context";
 import type { OptimisticSession } from "../chat/optimisticSessionContext";
 import { useOptimisticSession } from "../chat/optimisticSessionContext";
-import { routes } from "../routes";
+import { routes } from "../app/routes";
 import { addToastError } from "../shared/toast";
 import { SplashLogo } from "../shared/kit";
 import { SessionSidebarItem } from "./SessionSidebarItem";

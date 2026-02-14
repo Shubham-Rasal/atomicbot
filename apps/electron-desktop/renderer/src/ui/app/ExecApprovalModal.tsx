@@ -1,5 +1,5 @@
 import React from "react";
-import { useGatewayRpc } from "../gateway/context";
+import { useGatewayRpc } from "../../gateway/context";
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -30,15 +30,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parseExecApprovalRequested(payload: unknown): ExecApprovalRequest | null {
-  if (!isRecord(payload)) return null;
+  if (!isRecord(payload)) {return null;}
   const id = typeof payload.id === "string" ? payload.id.trim() : "";
   const request = payload.request;
-  if (!id || !isRecord(request)) return null;
+  if (!id || !isRecord(request)) {return null;}
   const command = typeof request.command === "string" ? request.command.trim() : "";
-  if (!command) return null;
+  if (!command) {return null;}
   const createdAtMs = typeof payload.createdAtMs === "number" ? payload.createdAtMs : 0;
   const expiresAtMs = typeof payload.expiresAtMs === "number" ? payload.expiresAtMs : 0;
-  if (!createdAtMs || !expiresAtMs) return null;
+  if (!createdAtMs || !expiresAtMs) {return null;}
   return {
     id,
     request: {
@@ -57,7 +57,7 @@ function parseExecApprovalRequested(payload: unknown): ExecApprovalRequest | nul
 }
 
 function parseExecApprovalResolved(payload: unknown): { id: string } | null {
-  if (!isRecord(payload)) return null;
+  if (!isRecord(payload)) {return null;}
   const id = typeof payload.id === "string" ? payload.id.trim() : "";
   return id ? { id } : null;
 }
@@ -87,9 +87,9 @@ function removeFromQueue(queue: ExecApprovalRequest[], id: string): ExecApproval
 function formatRemaining(ms: number): string {
   const remaining = Math.max(0, ms);
   const totalSeconds = Math.floor(remaining / 1000);
-  if (totalSeconds < 60) return `${totalSeconds}s`;
+  if (totalSeconds < 60) {return `${totalSeconds}s`;}
   const minutes = Math.floor(totalSeconds / 60);
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60) {return `${minutes}m`;}
   const hours = Math.floor(minutes / 60);
   return `${hours}h`;
 }
@@ -109,7 +109,7 @@ function useCountdown(expiresAtMs: number): string {
 // ── Meta row ───────────────────────────────────────────────
 
 function MetaRow({ label, value }: { label: string; value?: string | null }) {
-  if (!value) return null;
+  if (!value) {return null;}
   return (
     <div className="ExecApprovalMetaRow">
       <span className="ExecApprovalMetaLabel">{label}</span>
@@ -152,10 +152,10 @@ export function ExecApprovalOverlay() {
   }, [gw]);
 
   const active = queue[0];
-  if (!active) return null;
+  if (!active) {return null;}
 
   const handleDecision = async (decision: Decision) => {
-    if (busy) return;
+    if (busy) {return;}
     setBusy(true);
     setError(null);
     try {
@@ -203,7 +203,7 @@ function ExecApprovalCard({
   // Close on Escape -> deny
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onDecision("deny");
+      if (e.key === "Escape") {onDecision("deny");}
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);

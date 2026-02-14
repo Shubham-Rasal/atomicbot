@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 import { getDesktopApiOrNull } from "../../ipc/desktopApi";
-import { routes } from "../routes";
+import { routes } from "../app/routes";
 import "./OtherTab.css";
 import pkg from "../../../../package.json";
 
