@@ -1,5 +1,5 @@
 import React from "react";
-import type { ConfigSnapshot, GatewayRpcLike } from "./types";
+import type { AsyncRunner, ConfigSnapshot, GatewayRpcLike, SkillId } from "./types";
 import { getObject, getStringArray, unique } from "./utils";
 
 type UseWelcomeGitHubInput = {
@@ -7,6 +7,9 @@ type UseWelcomeGitHubInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  run: AsyncRunner;
+  markSkillConnected: (skillId: SkillId) => void;
+  goSkills: () => void;
 };
 
 type ExecApprovalsAllowlistEntry = {
@@ -63,7 +66,15 @@ function mergeAllowlistEntries(
   return next;
 }
 
-export function useWelcomeGitHub({ gw, loadConfig, setError, setStatus }: UseWelcomeGitHubInput) {
+export function useWelcomeGitHub({
+  gw,
+  loadConfig,
+  setError,
+  setStatus,
+  run,
+  markSkillConnected,
+  goSkills,
+}: UseWelcomeGitHubInput) {
   const enableGitHub = React.useCallback(
     async (params?: { ghResolvedPath?: string | null }): Promise<boolean> => {
       setError(null);
@@ -169,5 +180,55 @@ export function useWelcomeGitHub({ gw, loadConfig, setError, setStatus }: UseWel
     [gw, loadConfig, setError, setStatus]
   );
 
-  return { enableGitHub };
+  const onGitHubConnect = React.useCallback(
+    async (pat: string) => {
+      setStatus("Checking gh…");
+      await run(async () => {
+        const api = window.openclawDesktop;
+        if (!api) {
+          throw new Error("Desktop API not available");
+        }
+
+        const checkRes = await api.ghCheck();
+        if (!checkRes.ok) {
+          const stderr = checkRes.stderr?.trim();
+          const stdout = checkRes.stdout?.trim();
+          throw new Error(stderr || stdout || "gh check failed");
+        }
+
+        setStatus("Signing in to GitHub…");
+        const loginRes = await api.ghAuthLoginPat({ pat });
+        if (!loginRes.ok) {
+          const stderr = loginRes.stderr?.trim();
+          const stdout = loginRes.stdout?.trim();
+          throw new Error(stderr || stdout || "gh auth login failed");
+        }
+
+        setStatus("Verifying authentication…");
+        const statusRes = await api.ghAuthStatus();
+        if (!statusRes.ok) {
+          const stderr = statusRes.stderr?.trim();
+          const stdout = statusRes.stdout?.trim();
+          throw new Error(stderr || stdout || "gh auth status failed");
+        }
+
+        const userRes = await api.ghApiUser();
+        if (!userRes.ok) {
+          const stderr = userRes.stderr?.trim();
+          const stdout = userRes.stdout?.trim();
+          throw new Error(stderr || stdout || "gh api user failed");
+        }
+
+        const resolvedPath = checkRes.resolvedPath ?? loginRes.resolvedPath ?? null;
+        const ok = await enableGitHub({ ghResolvedPath: resolvedPath });
+        if (ok) {
+          markSkillConnected("github");
+          goSkills();
+        }
+      });
+    },
+    [run, enableGitHub, goSkills, markSkillConnected, setStatus]
+  );
+
+  return { enableGitHub, onGitHubConnect };
 }

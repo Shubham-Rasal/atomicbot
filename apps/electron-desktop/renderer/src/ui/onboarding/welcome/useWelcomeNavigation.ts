@@ -90,6 +90,10 @@ export function useWelcomeNavigation(navigate: NavigateFunction) {
     goSkills();
   }, [goConnections, goSkills]);
 
+  const goObsidianPage = useCallback(() => {
+    void navigate(`${routes.welcome}/obsidian`);
+  }, [navigate]);
+
   return {
     goApiKey,
     goAppleNotes,
@@ -100,6 +104,7 @@ export function useWelcomeNavigation(navigate: NavigateFunction) {
     goGogGoogleWorkspace,
     goModelSelect,
     goNotion,
+    goObsidianPage,
     goProviderSelect,
     goSkills,
     goSlackBack,

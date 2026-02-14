@@ -1,5 +1,5 @@
 import React from "react";
-import type { ConfigSnapshot, GatewayRpcLike } from "./types";
+import type { AsyncRunner, ConfigSnapshot, GatewayRpcLike, SkillId } from "./types";
 
 type GroupPolicy = "open" | "allowlist" | "disabled";
 type DmPolicy = "pairing" | "allowlist" | "open" | "disabled";
@@ -33,9 +33,20 @@ type UseWelcomeSlackInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  run: AsyncRunner;
+  markSkillConnected: (skillId: SkillId) => void;
+  goSlackReturn: () => void;
 };
 
-export function useWelcomeSlack({ gw, loadConfig, setError, setStatus }: UseWelcomeSlackInput) {
+export function useWelcomeSlack({
+  gw,
+  loadConfig,
+  setError,
+  setStatus,
+  run,
+  markSkillConnected,
+  goSlackReturn,
+}: UseWelcomeSlackInput) {
   const saveSlackConfig = React.useCallback(
     async (settings: {
       botName: string;
@@ -117,5 +128,26 @@ export function useWelcomeSlack({ gw, loadConfig, setError, setStatus }: UseWelc
     [gw, loadConfig, setError, setStatus]
   );
 
-  return { saveSlackConfig };
+  const onSlackConnect = React.useCallback(
+    async (settings: {
+      botName: string;
+      botToken: string;
+      appToken: string;
+      groupPolicy: GroupPolicy;
+      channelAllowlist: string[];
+      dmPolicy: DmPolicy;
+      dmAllowFrom: string[];
+    }) => {
+      await run(async () => {
+        const ok = await saveSlackConfig(settings);
+        if (ok) {
+          markSkillConnected("slack");
+          goSlackReturn();
+        }
+      });
+    },
+    [run, markSkillConnected, saveSlackConfig, goSlackReturn]
+  );
+
+  return { saveSlackConfig, onSlackConnect };
 }

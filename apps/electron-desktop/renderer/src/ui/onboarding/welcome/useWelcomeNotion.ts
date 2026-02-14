@@ -1,5 +1,5 @@
 import React from "react";
-import type { ConfigSnapshot, GatewayRpcLike } from "./types";
+import type { AsyncRunner, ConfigSnapshot, GatewayRpcLike, SkillId } from "./types";
 import { getObject, getStringArray, unique } from "./utils";
 
 type UseWelcomeNotionInput = {
@@ -7,6 +7,9 @@ type UseWelcomeNotionInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  run: AsyncRunner;
+  markSkillConnected: (skillId: SkillId) => void;
+  goSkills: () => void;
 };
 
 type ExecApprovalsAllowlistEntry = {
@@ -63,7 +66,15 @@ function mergeAllowlistEntries(
   return next;
 }
 
-export function useWelcomeNotion({ gw, loadConfig, setError, setStatus }: UseWelcomeNotionInput) {
+export function useWelcomeNotion({
+  gw,
+  loadConfig,
+  setError,
+  setStatus,
+  run,
+  markSkillConnected,
+  goSkills,
+}: UseWelcomeNotionInput) {
   const saveNotionApiKey = React.useCallback(
     async (apiKey: string): Promise<boolean> => {
       const trimmed = apiKey.trim();
@@ -162,5 +173,18 @@ export function useWelcomeNotion({ gw, loadConfig, setError, setStatus }: UseWel
     [gw, loadConfig, setError, setStatus]
   );
 
-  return { saveNotionApiKey };
+  const onNotionApiKeySubmit = React.useCallback(
+    async (apiKey: string) => {
+      await run(async () => {
+        const ok = await saveNotionApiKey(apiKey);
+        if (ok) {
+          markSkillConnected("notion");
+          goSkills();
+        }
+      });
+    },
+    [run, goSkills, markSkillConnected, saveNotionApiKey]
+  );
+
+  return { saveNotionApiKey, onNotionApiKeySubmit };
 }

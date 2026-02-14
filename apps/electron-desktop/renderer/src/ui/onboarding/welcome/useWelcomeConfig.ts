@@ -8,10 +8,19 @@ type UseWelcomeConfigInput = {
   state: Extract<GatewayState, { kind: "ready" }>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  goProviderSelect: () => void;
 };
 
-export function useWelcomeConfig({ gw, state, setError, setStatus }: UseWelcomeConfigInput) {
+export function useWelcomeConfig({
+  gw,
+  state,
+  setError,
+  setStatus,
+  goProviderSelect,
+}: UseWelcomeConfigInput) {
   const [configPath, setConfigPath] = React.useState<string | null>(null);
+  const [hasOpenAiProvider, setHasOpenAiProvider] = React.useState(false);
+  const [startBusy, setStartBusy] = React.useState(false);
 
   const loadConfig = React.useCallback(async () => {
     const snap = await gw.request<ConfigSnapshot>("config.get", {});
@@ -126,9 +135,48 @@ export function useWelcomeConfig({ gw, state, setError, setStatus }: UseWelcomeC
     setStatus("Config updated.");
   }, [gw, loadConfig, setError, setStatus, state.port, state.token]);
 
+  const refreshProviderFlags = React.useCallback(async () => {
+    try {
+      const snap = await loadConfig();
+      const cfg = getObject(snap.config);
+      const auth = getObject(cfg.auth);
+      const profiles = getObject(auth.profiles);
+      const order = getObject(auth.order);
+      const hasProfile = Object.values(profiles).some((p) => {
+        if (!p || typeof p !== "object" || Array.isArray(p)) {
+          return false;
+        }
+        return (p as { provider?: unknown }).provider === "openai";
+      });
+      const hasOrder = Object.prototype.hasOwnProperty.call(order, "openai");
+      setHasOpenAiProvider(Boolean(hasProfile || hasOrder));
+    } catch {
+      // Best-effort; keep false on failures.
+      setHasOpenAiProvider(false);
+    }
+  }, [loadConfig]);
+
+  const start = React.useCallback(async () => {
+    setError(null);
+    setStatus(null);
+    setStartBusy(true);
+    try {
+      await ensureExtendedConfig();
+      goProviderSelect();
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setStartBusy(false);
+    }
+  }, [ensureExtendedConfig, goProviderSelect, setError, setStatus]);
+
   return {
     configPath,
     ensureExtendedConfig,
+    hasOpenAiProvider,
     loadConfig,
+    refreshProviderFlags,
+    start,
+    startBusy,
   };
 }

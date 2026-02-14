@@ -7,9 +7,16 @@ type UseWelcomeModelsInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  goSkills: () => void;
 };
 
-export function useWelcomeModels({ gw, loadConfig, setError, setStatus }: UseWelcomeModelsInput) {
+export function useWelcomeModels({
+  gw,
+  loadConfig,
+  setError,
+  setStatus,
+  goSkills,
+}: UseWelcomeModelsInput) {
   const [models, setModels] = React.useState<ModelEntry[]>([]);
   const [modelsLoading, setModelsLoading] = React.useState(false);
   const [modelsError, setModelsError] = React.useState<string | null>(null);
@@ -69,11 +76,25 @@ export function useWelcomeModels({ gw, loadConfig, setError, setStatus }: UseWel
     [gw, loadConfig, setError, setStatus]
   );
 
+  const onModelSelect = React.useCallback(
+    async (modelId: string) => {
+      setError(null);
+      try {
+        await saveDefaultModel(modelId);
+        goSkills();
+      } catch (err) {
+        setError(String(err));
+      }
+    },
+    [saveDefaultModel, goSkills, setError]
+  );
+
   return {
     loadModels,
     models,
     modelsError,
     modelsLoading,
+    onModelSelect,
     saveDefaultModel,
   };
 }

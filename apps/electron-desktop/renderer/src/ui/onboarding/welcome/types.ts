@@ -33,3 +33,18 @@ export type ModelsListResult = {
     reasoning?: boolean;
   }>;
 };
+
+export type SkillId =
+  | "google-workspace"
+  | "media-understanding"
+  | "web-search"
+  | "notion"
+  | "trello"
+  | "apple-notes"
+  | "apple-reminders"
+  | "obsidian"
+  | "github"
+  | "slack";
+
+/** Signature of the `run` wrapper from `useAsyncAction`. */
+export type AsyncRunner = <T>(fn: () => Promise<T>) => Promise<T | undefined>;

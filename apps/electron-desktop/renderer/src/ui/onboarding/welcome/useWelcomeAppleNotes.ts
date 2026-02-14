@@ -1,5 +1,5 @@
 import React from "react";
-import type { ConfigSnapshot, GatewayRpcLike } from "./types";
+import type { AsyncRunner, ConfigSnapshot, GatewayRpcLike, SkillId } from "./types";
 import { getObject, getStringArray, unique } from "./utils";
 
 type UseWelcomeAppleNotesInput = {
@@ -7,6 +7,9 @@ type UseWelcomeAppleNotesInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  run: AsyncRunner;
+  markSkillConnected: (skillId: SkillId) => void;
+  goSkills: () => void;
 };
 
 type ExecApprovalsAllowlistEntry = {
@@ -68,6 +71,9 @@ export function useWelcomeAppleNotes({
   loadConfig,
   setError,
   setStatus,
+  run,
+  markSkillConnected,
+  goSkills,
 }: UseWelcomeAppleNotesInput) {
   const enableAppleNotes = React.useCallback(
     async (params?: { memoResolvedPath?: string | null }): Promise<boolean> => {
@@ -171,5 +177,26 @@ export function useWelcomeAppleNotes({
     [gw, loadConfig, setError, setStatus]
   );
 
-  return { enableAppleNotes };
+  const onAppleNotesCheckAndEnable = React.useCallback(async () => {
+    setStatus("Checking memo…");
+    await run(async () => {
+      const api = window.openclawDesktop;
+      if (!api) {
+        throw new Error("Desktop API not available");
+      }
+      const res = await api.memoCheck();
+      if (!res.ok) {
+        const stderr = res.stderr?.trim();
+        const stdout = res.stdout?.trim();
+        throw new Error(stderr || stdout || "memo check failed");
+      }
+      const ok = await enableAppleNotes({ memoResolvedPath: res.resolvedPath });
+      if (ok) {
+        markSkillConnected("apple-notes");
+        goSkills();
+      }
+    });
+  }, [run, enableAppleNotes, goSkills, markSkillConnected, setStatus]);
+
+  return { enableAppleNotes, onAppleNotesCheckAndEnable };
 }

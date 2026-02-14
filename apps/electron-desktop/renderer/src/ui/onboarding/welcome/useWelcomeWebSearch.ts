@@ -1,5 +1,5 @@
 import React from "react";
-import type { ConfigSnapshot, GatewayRpcLike } from "./types";
+import type { AsyncRunner, ConfigSnapshot, GatewayRpcLike, SkillId } from "./types";
 
 export type WebSearchProvider = "brave" | "perplexity";
 
@@ -8,6 +8,9 @@ type UseWelcomeWebSearchInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  run: AsyncRunner;
+  markSkillConnected: (skillId: SkillId) => void;
+  goSkills: () => void;
 };
 
 export function useWelcomeWebSearch({
@@ -15,6 +18,9 @@ export function useWelcomeWebSearch({
   loadConfig,
   setError,
   setStatus,
+  run,
+  markSkillConnected,
+  goSkills,
 }: UseWelcomeWebSearchInput) {
   const saveWebSearch = React.useCallback(
     async (provider: WebSearchProvider, apiKey: string): Promise<boolean> => {
@@ -69,5 +75,18 @@ export function useWelcomeWebSearch({
     [gw, loadConfig, setError, setStatus]
   );
 
-  return { saveWebSearch };
+  const onWebSearchSubmit = React.useCallback(
+    async (provider: WebSearchProvider, apiKey: string) => {
+      await run(async () => {
+        const ok = await saveWebSearch(provider, apiKey);
+        if (ok) {
+          markSkillConnected("web-search");
+          goSkills();
+        }
+      });
+    },
+    [run, goSkills, markSkillConnected, saveWebSearch]
+  );
+
+  return { saveWebSearch, onWebSearchSubmit };
 }

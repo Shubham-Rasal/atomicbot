@@ -1,5 +1,5 @@
 import React from "react";
-import type { ConfigSnapshot, GatewayRpcLike } from "./types";
+import type { AsyncRunner, ConfigSnapshot, GatewayRpcLike, SkillId } from "./types";
 import { getObject, getStringArray, unique } from "./utils";
 
 type UseWelcomeTrelloInput = {
@@ -7,6 +7,9 @@ type UseWelcomeTrelloInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  run: AsyncRunner;
+  markSkillConnected: (skillId: SkillId) => void;
+  goSkills: () => void;
 };
 
 type ExecApprovalsAllowlistEntry = {
@@ -63,7 +66,15 @@ function mergeAllowlistEntries(
   return next;
 }
 
-export function useWelcomeTrello({ gw, loadConfig, setError, setStatus }: UseWelcomeTrelloInput) {
+export function useWelcomeTrello({
+  gw,
+  loadConfig,
+  setError,
+  setStatus,
+  run,
+  markSkillConnected,
+  goSkills,
+}: UseWelcomeTrelloInput) {
   const saveTrello = React.useCallback(
     async (apiKey: string, token: string): Promise<boolean> => {
       const trimmedKey = apiKey.trim();
@@ -178,5 +189,18 @@ export function useWelcomeTrello({ gw, loadConfig, setError, setStatus }: UseWel
     [gw, loadConfig, setError, setStatus]
   );
 
-  return { saveTrello };
+  const onTrelloSubmit = React.useCallback(
+    async (apiKey: string, token: string) => {
+      await run(async () => {
+        const ok = await saveTrello(apiKey, token);
+        if (ok) {
+          markSkillConnected("trello");
+          goSkills();
+        }
+      });
+    },
+    [run, goSkills, markSkillConnected, saveTrello]
+  );
+
+  return { saveTrello, onTrelloSubmit };
 }

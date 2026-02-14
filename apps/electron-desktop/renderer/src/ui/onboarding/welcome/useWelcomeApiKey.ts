@@ -7,9 +7,18 @@ type UseWelcomeApiKeyInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  loadModels?: () => Promise<void>;
+  refreshProviderFlags?: () => Promise<void>;
 };
 
-export function useWelcomeApiKey({ gw, loadConfig, setError, setStatus }: UseWelcomeApiKeyInput) {
+export function useWelcomeApiKey({
+  gw,
+  loadConfig,
+  setError,
+  setStatus,
+  loadModels,
+  refreshProviderFlags,
+}: UseWelcomeApiKeyInput) {
   const saveApiKey = React.useCallback(
     async (provider: Provider, apiKey: string): Promise<boolean> => {
       if (!apiKey.trim()) {
@@ -51,5 +60,18 @@ export function useWelcomeApiKey({ gw, loadConfig, setError, setStatus }: UseWel
     [gw, loadConfig, setError, setStatus]
   );
 
-  return { saveApiKey };
+  const onMediaProviderKeySubmit = React.useCallback(
+    async (provider: "openai", apiKey: string) => {
+      // Save an additional provider key without re-running model selection flow.
+      const ok = await saveApiKey(provider, apiKey);
+      if (ok) {
+        await loadModels?.();
+        await refreshProviderFlags?.();
+      }
+      return ok;
+    },
+    [loadModels, refreshProviderFlags, saveApiKey]
+  );
+
+  return { saveApiKey, onMediaProviderKeySubmit };
 }

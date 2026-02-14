@@ -2,11 +2,15 @@ import React from "react";
 import type { ChannelsStatusResult, ConfigSnapshot, GatewayRpcLike } from "./types";
 import { getObject, getStringArray, unique } from "./utils";
 
+type ConnectionStatus = "connect" | "connected";
+
 type UseWelcomeTelegramInput = {
   gw: GatewayRpcLike;
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  goTelegramUser: () => void;
+  goConnections: () => void;
 };
 
 export function useWelcomeTelegram({
@@ -14,9 +18,12 @@ export function useWelcomeTelegram({
   loadConfig,
   setError,
   setStatus,
+  goTelegramUser,
+  goConnections,
 }: UseWelcomeTelegramInput) {
   const [telegramToken, setTelegramToken] = React.useState("");
   const [telegramUserId, setTelegramUserId] = React.useState("");
+  const [telegramStatus, setTelegramStatus] = React.useState<ConnectionStatus>("connect");
   const [channelsProbe, setChannelsProbe] = React.useState<ChannelsStatusResult | null>(null);
 
   const saveTelegramToken = React.useCallback(async (): Promise<boolean> => {
@@ -116,12 +123,44 @@ export function useWelcomeTelegram({
     return true;
   }, [gw, loadConfig, setError, setStatus, telegramUserId]);
 
+  const onTelegramTokenNext = React.useCallback(async () => {
+    setError(null);
+    setStatus(null);
+    try {
+      const ok = await saveTelegramToken();
+      if (ok) {
+        goTelegramUser();
+      }
+    } catch (err) {
+      setError(String(err));
+      setStatus(null);
+    }
+  }, [goTelegramUser, saveTelegramToken, setError, setStatus]);
+
+  const onTelegramUserNext = React.useCallback(async () => {
+    setError(null);
+    setStatus(null);
+    try {
+      const ok = await saveTelegramAllowFrom();
+      if (ok) {
+        setTelegramStatus("connected");
+        goConnections();
+      }
+    } catch (err) {
+      setError(String(err));
+      setStatus(null);
+    }
+  }, [goConnections, saveTelegramAllowFrom, setError, setStatus]);
+
   return {
     channelsProbe,
+    onTelegramTokenNext,
+    onTelegramUserNext,
     saveTelegramAllowFrom,
     saveTelegramToken,
     setTelegramToken,
     setTelegramUserId,
+    telegramStatus,
     telegramToken,
     telegramUserId,
   };

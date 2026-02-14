@@ -1,5 +1,5 @@
 import React from "react";
-import type { ConfigSnapshot, GatewayRpcLike } from "./types";
+import type { AsyncRunner, ConfigSnapshot, GatewayRpcLike, SkillId } from "./types";
 import { getObject, getStringArray, unique } from "./utils";
 
 type UseWelcomeAppleRemindersInput = {
@@ -7,6 +7,9 @@ type UseWelcomeAppleRemindersInput = {
   loadConfig: () => Promise<ConfigSnapshot>;
   setError: (value: string | null) => void;
   setStatus: (value: string | null) => void;
+  run: AsyncRunner;
+  markSkillConnected: (skillId: SkillId) => void;
+  goSkills: () => void;
 };
 
 type ExecApprovalsAllowlistEntry = {
@@ -68,6 +71,9 @@ export function useWelcomeAppleReminders({
   loadConfig,
   setError,
   setStatus,
+  run,
+  markSkillConnected,
+  goSkills,
 }: UseWelcomeAppleRemindersInput) {
   const enableAppleReminders = React.useCallback(
     async (params?: { remindctlResolvedPath?: string | null }): Promise<boolean> => {
@@ -174,5 +180,36 @@ export function useWelcomeAppleReminders({
     [gw, loadConfig, setError, setStatus]
   );
 
-  return { enableAppleReminders };
+  const onAppleRemindersAuthorizeAndEnable = React.useCallback(async () => {
+    setStatus("Authorizing remindctl…");
+    await run(async () => {
+      const api = window.openclawDesktop;
+      if (!api) {
+        throw new Error("Desktop API not available");
+      }
+      const authorizeRes = await api.remindctlAuthorize();
+      if (!authorizeRes.ok) {
+        const stderr = authorizeRes.stderr?.trim();
+        const stdout = authorizeRes.stdout?.trim();
+        throw new Error(stderr || stdout || "remindctl authorize failed");
+      }
+
+      setStatus("Checking Reminders access…");
+      const todayRes = await api.remindctlTodayJson();
+      if (!todayRes.ok) {
+        const stderr = todayRes.stderr?.trim();
+        const stdout = todayRes.stdout?.trim();
+        throw new Error(stderr || stdout || "remindctl check failed");
+      }
+
+      const resolvedPath = todayRes.resolvedPath ?? authorizeRes.resolvedPath ?? null;
+      const ok = await enableAppleReminders({ remindctlResolvedPath: resolvedPath });
+      if (ok) {
+        markSkillConnected("apple-reminders");
+        goSkills();
+      }
+    });
+  }, [run, enableAppleReminders, goSkills, markSkillConnected, setStatus]);
+
+  return { enableAppleReminders, onAppleRemindersAuthorizeAndEnable };
 }

@@ -1,17 +1,8 @@
 import { useCallback, useState } from "react";
 import { useAsyncAction } from "./useAsyncAction";
+import type { SkillId } from "./types";
 
-export type SkillId =
-  | "google-workspace"
-  | "media-understanding"
-  | "web-search"
-  | "notion"
-  | "trello"
-  | "apple-notes"
-  | "apple-reminders"
-  | "obsidian"
-  | "github"
-  | "slack";
+export type { SkillId };
 
 export type SkillStatus = "connect" | "connected";
 
