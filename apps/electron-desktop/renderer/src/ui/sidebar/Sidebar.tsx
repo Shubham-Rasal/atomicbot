@@ -261,6 +261,27 @@ export function Sidebar() {
             Terminal
           </NavLink>
         )}
+        <NavLink to={routes.tasks} className={css.UiChatSidebarSettings} aria-label="Tasks">
+          <span className={css.UiChatSidebarSettingsIcon} aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+            >
+              <circle cx="10" cy="10" r="7.5" stroke="#8B8B8B" strokeWidth="1.5" />
+              <path
+                d="M10 5.5V10L13 13"
+                stroke="#8B8B8B"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          Tasks
+        </NavLink>
         <NavLink to={routes.settings} className={css.UiChatSidebarSettings} aria-label="Settings">
           <span className={css.UiChatSidebarSettingsIcon} aria-hidden="true">
             <svg

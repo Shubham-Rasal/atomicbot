@@ -7,6 +7,7 @@ export const routes = {
   chat: "/chat",
   settings: "/settings",
   terminal: "/terminal",
+  tasks: "/tasks",
 } as const;
 
 export function isBootstrapPath(pathname: string): boolean {
