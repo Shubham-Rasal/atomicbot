@@ -331,6 +331,7 @@ export async function runEmbeddedAttempt(
           accountId: params.agentAccountId,
         }) ?? [])
       : undefined;
+
     if (runtimeChannel === "telegram" && params.config) {
       const inlineButtonsScope = resolveTelegramInlineButtonsScope({
         cfg: params.config,

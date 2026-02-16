@@ -68,7 +68,8 @@ apps/ios/*.dSYM.zip
 
 # provisioning profiles (local)
 apps/ios/*.mobileprovision
-
+.env
+.idea/**
 # Local untracked files
 .local/
 docs/.local/
@@ -79,6 +80,7 @@ USER.md
 
 # local tooling
 .serena/
+.history/
 
 # Agent credentials and memory (NEVER COMMIT)
 /memory/

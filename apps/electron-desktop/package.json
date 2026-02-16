@@ -1,0 +1,179 @@
+{
+  "name": "atomicbot-desktop",
+  "private": true,
+  "version": "1.0.4",
+  "description": "Atomic Bot makes things for you",
+  "type": "commonjs",
+  "main": "dist/main.js",
+  "author": "",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "scripts": {
+    "build:all": "npm run build && npm run build:renderer",
+    "prepare:gog:all": "npm run fetch:gog && npm run prepare:gog:credentials && npm run prepare:gog",
+    "prepare:jq:all": "npm run fetch:jq && npm run prepare:jq",
+    "prepare:memo:all": "npm run fetch:memo && npm run build:memo && npm run prepare:memo",
+    "prepare:remindctl:all": "npm run fetch:remindctl && npm run prepare:remindctl",
+    "prepare:obsidian-cli:all": "npm run fetch:obsidian-cli && npm run prepare:obsidian-cli",
+    "prepare:gh:all": "npm run fetch:gh && npm run prepare:gh",
+    "prepare:runtimes": "npm run prepare:node && npm run prepare:gog:all && npm run prepare:jq:all && npm run prepare:memo:all && npm run prepare:remindctl:all && npm run prepare:obsidian-cli:all && npm run prepare:gh:all",
+    "rebuild": "electron-rebuild -f -w node-pty",
+    "dev": "npm run rebuild && npm run build:all && cross-env ELECTRON_RUN_AS_NODE= electron .",
+    "build": "tsc -p tsconfig.json",
+    "build:renderer": "vite build --config renderer/vite.config.ts",
+    "prepare:all": "npm run prepare:openclaw && npm run prepare:runtimes",
+    "prepare:openclaw": "node scripts/prepare-openclaw-bundle.mjs",
+    "prepare:node": "node scripts/prepare-node-runtime.mjs",
+    "fetch:gog": "node scripts/fetch-gog-runtime.mjs",
+    "fetch:jq": "node scripts/fetch-jq-runtime.mjs",
+    "fetch:memo": "node scripts/fetch-memo-runtime.mjs",
+    "fetch:remindctl": "node scripts/fetch-remindctl-runtime.mjs",
+    "fetch:obsidian-cli": "node scripts/fetch-obsidian-cli-runtime.mjs",
+    "fetch:gh": "node scripts/fetch-gh-runtime.mjs",
+    "build:memo": "node scripts/build-memo-runtime.mjs",
+    "prepare:gog:credentials": "node --env-file=.env scripts/prepare-gog-credentials.mjs",
+    "prepare:gog": "node scripts/prepare-gog-runtime.mjs",
+    "prepare:jq": "node scripts/prepare-jq-runtime.mjs",
+    "prepare:memo": "node scripts/prepare-memo-runtime.mjs",
+    "prepare:remindctl": "node scripts/prepare-remindctl-runtime.mjs",
+    "prepare:obsidian-cli": "node scripts/prepare-obsidian-cli-runtime.mjs",
+    "prepare:gh": "node scripts/prepare-gh-runtime.mjs",
+    "reset:local": "node scripts/reset-local-state.mjs",
+    "reset:local:yes": "node scripts/reset-local-state.mjs --yes",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "dist:local": "CSC_IDENTITY_AUTO_DISCOVERY=false npm run dist -- --publish never",
+    "dist": "npm run build:all && electron-builder",
+    "dist:env": "npm run build:all &&  node --env-file=.env ./node_modules/electron-builder/out/cli/cli.js",
+    "dist:env:local": "CSC_IDENTITY_AUTO_DISCOVERY=false npm run dist:env -- --publish never",
+    "release": "bash scripts/release.sh",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
+    "@reduxjs/toolkit": "^2.9.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.2.0",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.3",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "appdmg": "^0.6.6",
+    "cross-env": "^10.1.0",
+    "electron": "^40.1.0",
+    "electron-builder": "^26.7.0",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.4.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-markdown": "^10.1.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.13.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "electron-updater": "^6.7.3",
+    "json5": "^2.2.3",
+    "jszip": "^3.10.1",
+    "node-pty": "^1.1.0",
+    "react-hot-toast": "^2.6.0"
+  },
+  "build": {
+    "appId": "ai.atomicbot.desktop",
+    "productName": "Atomic Bot",
+    "afterPack": "scripts/electron-builder.afterPack-sign-extra-resources.cjs",
+    "afterSign": "scripts/electron-builder.afterSign-notarize.cjs",
+    "afterAllArtifactBuild": "scripts/electron-builder.afterAllArtifactBuild-notarize-dmg.cjs",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "renderer/dist/**",
+      "assets/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "assets/icon.png",
+        "to": "assets/icon.png"
+      },
+      {
+        "from": "assets/trayTemplate.png",
+        "to": "assets/trayTemplate.png"
+      },
+      {
+        "from": "assets/trayTemplate@2x.png",
+        "to": "assets/trayTemplate@2x.png"
+      },
+      {
+        "from": "vendor/openclaw",
+        "to": "openclaw"
+      },
+      {
+        "from": "vendor/openclaw/node_modules",
+        "to": "openclaw/node_modules",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "vendor/node",
+        "to": "node"
+      },
+      {
+        "from": "vendor/gog",
+        "to": "gog"
+      },
+      {
+        "from": "vendor/jq",
+        "to": "jq"
+      },
+      {
+        "from": "vendor/memo",
+        "to": "memo"
+      },
+      {
+        "from": "vendor/remindctl",
+        "to": "remindctl"
+      },
+      {
+        "from": "vendor/obsidian-cli",
+        "to": "obsidian-cli"
+      },
+      {
+        "from": "vendor/gh",
+        "to": "gh"
+      },
+      {
+        "from": ".gog-runtime/credentials",
+        "to": "gog-credentials"
+      }
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "AtomicBot-ai",
+      "repo": "atomicbot",
+      "releaseType": "draft"
+    },
+    "mac": {
+      "artifactName": "Atomic-Bot-${version}-${arch}-mac.${ext}",
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.inherit.plist",
+      "target": [
+        "zip"
+      ],
+      "extendInfo": {
+        "NSRemindersUsageDescription": "Atomic Bot needs access to Reminders to create, list, and complete reminders on your behalf."
+      }
+    }
+  }
+}

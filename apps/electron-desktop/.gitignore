@@ -1,0 +1,14 @@
+dist/
+node_modules/
+release/
+vendor/
+.gog-runtime/
+.jq-runtime/
+.memo-runtime/
+.remindctl-runtime/
+.obsidian-cli-runtime/
+.gh-runtime/
+.env
+.env.*
+.DS_Store
+

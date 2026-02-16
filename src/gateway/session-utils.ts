@@ -169,10 +169,9 @@ export function deriveSessionTitle(
   if (entry.subject?.trim()) {
     return entry.subject.trim();
   }
-
   if (firstUserMessage?.trim()) {
-    const normalized = firstUserMessage.replace(/\s+/g, " ").trim();
-    return truncateTitle(normalized, DERIVED_TITLE_MAX_LEN);
+    // Return raw text (capped at 1000 chars); client-side UI handles sanitization and truncation.
+    return firstUserMessage.slice(0, 1000);
   }
 
   if (entry.sessionId) {
@@ -810,6 +809,11 @@ export function listSessionsFromStore(params: {
     sessions = sessions.slice(0, limit);
   }
 
+  // When multiple agent stores are combined, storePath is "(multiple)" which breaks
+  // transcript file resolution (path.dirname yields "."). Pass undefined so the
+  // resolver falls back to using the absolute sessionFile path directly.
+  const effectiveStorePath = storePath === "(multiple)" ? undefined : storePath;
+
   const finalSessions: GatewaySessionRow[] = sessions.map((s) => {
     const { entry, ...rest } = s;
     let derivedTitle: string | undefined;
@@ -821,15 +825,20 @@ export function listSessionsFromStore(params: {
           parsed && parsed.agentId ? normalizeAgentId(parsed.agentId) : resolveDefaultAgentId(cfg);
         const fields = readSessionTitleFieldsFromTranscript(
           entry.sessionId,
-          storePath,
+          effectiveStorePath,
           entry.sessionFile,
           agentId,
         );
-        if (includeDerivedTitles) {
-          derivedTitle = deriveSessionTitle(entry, fields.firstUserMessage);
-        }
-        if (includeLastMessage && fields.lastMessagePreview) {
-          lastMessagePreview = fields.lastMessagePreview;
+        derivedTitle = deriveSessionTitle(entry, firstUserMsg);
+      }
+      if (includeLastMessage) {
+        const lastMsg = readLastMessagePreviewFromTranscript(
+          entry.sessionId,
+          storePath,
+          entry.sessionFile,
+        );
+        if (lastMsg) {
+          lastMessagePreview = lastMsg;
         }
       }
     }

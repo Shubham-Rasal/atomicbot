@@ -388,6 +388,7 @@ export async function compactEmbeddedPiSessionDirect(
           accountId: params.agentAccountId,
         }) ?? [])
       : undefined;
+
     if (runtimeChannel === "telegram" && params.config) {
       const inlineButtonsScope = resolveTelegramInlineButtonsScope({
         cfg: params.config,
