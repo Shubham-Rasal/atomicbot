@@ -46,6 +46,11 @@ function buildValidationSpec(provider: string, apiKey: string): ProviderValidati
         url: "https://api.minimax.chat/v1/models",
         headers: { Authorization: `Bearer ${apiKey}` },
       };
+    case "xai":
+      return {
+        url: "https://api.x.ai/v1/models",
+        headers: { Authorization: `Bearer ${apiKey}` },
+      };
     default:
       return null;
   }

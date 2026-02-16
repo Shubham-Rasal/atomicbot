@@ -35,6 +35,7 @@ export function getConfiguredProviders(cfg: ConfigData | undefined): Set<ModelPr
       normalized === "openrouter" ||
       normalized === "google" ||
       normalized === "openai" ||
+      normalized === "xai" ||
       normalized === "zai" ||
       normalized === "minimax"
     ) {

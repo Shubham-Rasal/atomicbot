@@ -1,4 +1,4 @@
-export type ModelProvider = "anthropic" | "google" | "openai" | "openrouter" | "zai" | "minimax";
+export type ModelProvider = "anthropic" | "google" | "openai" | "openrouter" | "xai" | "zai" | "minimax";
 
 export type ModelProviderInfo = {
   id: ModelProvider;
@@ -17,6 +17,7 @@ export const PROVIDER_ICONS: Record<ModelProvider, string> = {
   openai: "openai.svg",
   google: "gemini.svg",
   minimax: "minimax.svg",
+  xai: "xai.svg",
   zai: "zai.svg",
   openrouter: "openrouter.svg",
 };
@@ -65,6 +66,14 @@ export const MODEL_PROVIDERS: ModelProviderInfo[] = [
     helpText: "Get your API key from the OpenAI Platform.",
   },
   {
+    id: "xai",
+    name: "xAI (Grok)",
+    description: "High-performance reasoning model by xAI with web search capabilities",
+    placeholder: "xai-...",
+    helpUrl: "https://console.x.ai/",
+    helpText: "Get your API key from the xAI Console.",
+  },
+  {
     id: "zai",
     name: "Z.ai (GLM)",
     description: "Cost-effective models for everyday tasks and high-volume usage",
@@ -87,6 +96,7 @@ export const MODEL_PROVIDER_BY_ID: Record<ModelProvider, ModelProviderInfo> = {
   openrouter: MODEL_PROVIDERS.find((p) => p.id === "openrouter")!,
   google: MODEL_PROVIDERS.find((p) => p.id === "google")!,
   openai: MODEL_PROVIDERS.find((p) => p.id === "openai")!,
+  xai: MODEL_PROVIDERS.find((p) => p.id === "xai")!,
   zai: MODEL_PROVIDERS.find((p) => p.id === "zai")!,
   minimax: MODEL_PROVIDERS.find((p) => p.id === "minimax")!,
 };

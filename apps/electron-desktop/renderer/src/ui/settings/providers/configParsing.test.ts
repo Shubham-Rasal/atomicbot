@@ -162,13 +162,14 @@ describe("getConfiguredProviders", () => {
           openrouter: ["b"],
           google: ["c"],
           openai: ["d"],
-          zai: ["e"],
-          minimax: ["f"],
+          xai: ["e"],
+          zai: ["f"],
+          minimax: ["g"],
         },
       },
     };
     expect(getConfiguredProviders(cfg)).toEqual(
-      new Set(["anthropic", "openrouter", "google", "openai", "zai", "minimax"])
+      new Set(["anthropic", "openrouter", "google", "openai", "xai", "zai", "minimax"])
     );
   });
 });
