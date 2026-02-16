@@ -185,7 +185,7 @@ export function ExecApprovalOverlay() {
             console.error("[ExecApproval] auto-continue chat.send failed:", err);
             dispatch(chatActions.setAwaitingContinuation(false));
           });
-        }, 1500);
+        }, 2300);
       }
     } catch (err) {
       setError(`Exec approval failed: ${String(err)}`);

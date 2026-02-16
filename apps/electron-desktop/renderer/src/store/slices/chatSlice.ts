@@ -22,6 +22,8 @@ export type UiToolResult = {
   toolName: string;
   text: string;
   status?: string;
+  /** Attachments (images/files) from the tool result content. */
+  attachments?: UiMessageAttachment[];
 };
 
 export type UiMessage = {
@@ -282,11 +284,13 @@ function extractToolResult(msg: unknown): UiToolResult | null {
   const role = typeof m.role === "string" ? m.role : "";
   if (role !== "toolResult" && role !== "tool_result") {return null;}
   const text = extractText(msg);
+  const attachments = extractAttachmentsFromMessage(msg);
   return {
     toolCallId: typeof m.toolCallId === "string" ? m.toolCallId : "",
     toolName: typeof m.toolName === "string" ? m.toolName : "unknown",
     text,
     status: typeof m.details?.status === "string" ? m.details.status : undefined,
+    attachments: attachments.length > 0 ? attachments : undefined,
   };
 }
 

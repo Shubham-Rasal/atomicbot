@@ -1,5 +1,6 @@
 import React from "react";
-import type { UiToolCall, UiToolResult, LiveToolCall } from "@store/slices/chatSlice";
+import type { UiToolCall, UiToolResult, LiveToolCall, UiMessageAttachment } from "@store/slices/chatSlice";
+import { ChatAttachmentCard, getFileTypeLabel } from "./ChatAttachmentCard";
 import s from "./ToolCallCard.module.css";
 
 /** Human-readable labels for known tool names. */
@@ -50,6 +51,34 @@ function ToolIcon() {
   );
 }
 
+/** Render images (expanded) and file attachments from a tool result. */
+function ToolResultAttachments({ attachments }: { attachments: UiMessageAttachment[] }) {
+  const images = attachments.filter((a) => a.dataUrl && a.mimeType?.startsWith("image/"));
+  const files = attachments.filter(
+    (a) => !(a.dataUrl && a.mimeType?.startsWith("image/")),
+  );
+
+  return (
+    <div className={s.ToolCallAttachments}>
+      {images.map((att, idx) => (
+        <div key={`img-${idx}`} className={s.ToolCallAttachmentImage}>
+          <img src={att.dataUrl} alt="" className={s.ToolCallAttachmentImg} />
+        </div>
+      ))}
+      {files.map((att, idx) => {
+        const mimeType = att.mimeType ?? "application/octet-stream";
+        return (
+          <ChatAttachmentCard
+            key={`file-${idx}`}
+            fileName={getFileTypeLabel(mimeType)}
+            mimeType={mimeType}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 /** Render a single tool call as a compact card. */
 export function ToolCallCard({
   toolCall,
@@ -58,10 +87,15 @@ export function ToolCallCard({
   toolCall: UiToolCall;
   result?: UiToolResult;
 }) {
-  const [expanded, setExpanded] = React.useState(false);
+  // Auto-expand when the result contains images
+  const hasImages = result?.attachments?.some(
+    (a) => a.dataUrl && a.mimeType?.startsWith("image/"),
+  ) ?? false;
+  const [expanded, setExpanded] = React.useState(hasImages);
   const label = TOOL_LABELS[toolCall.name] ?? toolCall.name;
   const argsSummary = formatArgs(toolCall.arguments);
   const hasResult = Boolean(result?.text);
+  const hasAttachments = Boolean(result?.attachments?.length);
 
   return (
     <div className={s.ToolCallCard}>
@@ -99,6 +133,9 @@ export function ToolCallCard({
       </button>
       {expanded && hasResult ? (
         <pre className={s.ToolCallOutput}>{result!.text}</pre>
+      ) : null}
+      {expanded && hasAttachments ? (
+        <ToolResultAttachments attachments={result!.attachments!} />
       ) : null}
     </div>
   );
