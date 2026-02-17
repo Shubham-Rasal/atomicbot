@@ -64,3 +64,53 @@
   justify-content: space-between;
   gap: 12px;
 }
+
+/* ── Auth mode toggle (API key / Setup token) ── */
+
+.UiAuthModeToggle {
+  display: flex;
+  gap: 0;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px;
+  margin-bottom: 16px;
+}
+
+.UiAuthModeBtn {
+  flex: 1;
+  padding: 7px 12px;
+  border: none;
+  border-radius: calc(var(--radius-lg) - 3px);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+  white-space: nowrap;
+}
+
+.UiAuthModeBtn:hover:not(:disabled) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.UiAuthModeBtn--active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.UiAuthModeBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.UiInlineCode {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.9em;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 5px;
+  border-radius: 4px;
+}

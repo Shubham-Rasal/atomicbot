@@ -61,6 +61,46 @@ export function useWelcomeApiKey({
     [gw, loadConfig, setError, setStatus]
   );
 
+  const saveSetupToken = React.useCallback(
+    async (provider: Provider, token: string): Promise<boolean> => {
+      if (!token.trim()) {
+        setError("Setup token is required.");
+        return false;
+      }
+      setError(null);
+      setStatus(`Saving ${provider} setup token…`);
+      await getDesktopApiOrNull()?.setSetupToken(provider, token.trim());
+
+      const snap = await loadConfig();
+      const baseHash = typeof snap.hash === "string" && snap.hash.trim() ? snap.hash.trim() : null;
+      if (!baseHash) {
+        throw new Error("Config base hash missing. Reload and try again.");
+      }
+      const profileId = `${provider}:default`;
+      await gw.request("config.patch", {
+        baseHash,
+        raw: JSON.stringify(
+          {
+            auth: {
+              profiles: {
+                [profileId]: { provider, mode: "token" },
+              },
+              order: {
+                [provider]: [profileId],
+              },
+            },
+          },
+          null,
+          2
+        ),
+        note: `Welcome: enable ${provider} token profile`,
+      });
+      setStatus(`${provider} setup token saved.`);
+      return true;
+    },
+    [gw, loadConfig, setError, setStatus]
+  );
+
   const onMediaProviderKeySubmit = React.useCallback(
     async (provider: "openai", apiKey: string) => {
       // Save an additional provider key without re-running model selection flow.
@@ -74,5 +114,5 @@ export function useWelcomeApiKey({
     [loadModels, refreshProviderFlags, saveApiKey]
   );
 
-  return { saveApiKey, onMediaProviderKeySubmit };
+  return { saveApiKey, saveSetupToken, onMediaProviderKeySubmit };
 }

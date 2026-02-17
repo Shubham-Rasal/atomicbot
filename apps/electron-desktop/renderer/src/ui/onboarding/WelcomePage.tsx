@@ -109,6 +109,7 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
               error={welcome.error}
               busy={welcome.apiKeyBusy}
               onSubmit={welcome.onApiKeySubmit}
+              onSubmitSetupToken={(token) => void welcome.onSetupTokenSubmit(token)}
               onBack={welcome.goProviderSelect}
             />
           ) : (

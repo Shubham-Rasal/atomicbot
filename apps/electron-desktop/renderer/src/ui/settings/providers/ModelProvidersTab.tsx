@@ -74,6 +74,9 @@ export function ModelProvidersTab(props: {
               provider={state.modalProviderInfo}
               busy={state.busyProvider === state.modalProviderInfo.id}
               onSave={(key) => void state.saveProviderApiKey(state.modalProviderInfo!.id, key)}
+              onSaveSetupToken={(token) =>
+                void state.saveProviderSetupToken(state.modalProviderInfo!.id, token)
+              }
               onPaste={state.pasteFromClipboard}
               onClose={() => state.setModalProvider(null)}
             />

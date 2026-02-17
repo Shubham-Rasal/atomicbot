@@ -3,6 +3,7 @@ import {
   resolveAuthProfilesPath,
   type ApiKeyProfile,
   type AuthProfilesStore,
+  type TokenProfile,
   writeAuthProfilesStoreAtomic,
 } from "./authProfilesStore";
 
@@ -71,4 +72,42 @@ export function applyUpsertApiKeyProfile(
     order[params.profile.provider] = ensureOrderFront({ list: prev, id: params.profileId });
   }
   return { version: store.version, profiles, order };
+}
+
+export function upsertTokenProfile(params: {
+  stateDir: string;
+  provider: string;
+  token: string;
+  profileName?: string;
+  agentId?: string;
+}): { profileId: string; authProfilesPath: string } {
+  const provider = normalizeProvider(params.provider);
+  const token = params.token.trim();
+  if (!provider) {
+    throw new Error("provider is required");
+  }
+  if (!token) {
+    throw new Error("token is required");
+  }
+
+  const profileName = normalizeProfileName(params.profileName ?? "default");
+  const profileId = makeProfileId({ provider, profileName });
+  const authProfilesPath = resolveAuthProfilesPath({
+    stateDir: params.stateDir,
+    agentId: params.agentId,
+  });
+
+  const store = readAuthProfilesStore({ authProfilesPath });
+  const profile: TokenProfile = { type: "token", provider, token };
+  const profiles = { ...store.profiles, [profileId]: profile };
+  const order = { ...store.order };
+  const prev = Array.isArray(order[provider]) ? order[provider] : [];
+  order[provider] = ensureOrderFront({ list: prev, id: profileId });
+
+  writeAuthProfilesStoreAtomic({
+    authProfilesPath,
+    store: { version: store.version, profiles, order },
+  });
+
+  return { profileId, authProfilesPath };
 }

@@ -38,6 +38,7 @@ declare global {
       startGateway: () => Promise<{ ok: true }>;
       openExternal: (url: string) => Promise<void>;
       setApiKey: (provider: string, apiKey: string) => Promise<{ ok: true }>;
+      setSetupToken: (provider: string, token: string) => Promise<{ ok: true }>;
       validateApiKey: (
         provider: string,
         apiKey: string

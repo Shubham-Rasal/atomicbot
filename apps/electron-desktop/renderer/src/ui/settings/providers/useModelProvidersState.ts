@@ -238,6 +238,51 @@ export function useModelProvidersState(props: {
     [props, loadFreshBaseHash, refreshKeyConfiguredProviders]
   );
 
+  const saveProviderSetupToken = React.useCallback(
+    async (provider: ModelProvider, token: string) => {
+      props.onError(null);
+      setModelStatus(null);
+      if (!token) {
+        props.onError(`${provider} setup token is required.`);
+        return;
+      }
+
+      setBusyProvider(provider);
+      try {
+        const baseHash = await loadFreshBaseHash();
+        await getDesktopApiOrNull()?.setSetupToken(provider, token);
+        const profileId = `${provider}:default`;
+        await props.gw.request("config.patch", {
+          baseHash,
+          raw: JSON.stringify(
+            {
+              auth: {
+                profiles: {
+                  [profileId]: { provider, mode: "token" },
+                },
+                order: {
+                  [provider]: [profileId],
+                },
+              },
+            },
+            null,
+            2
+          ),
+          note: `Settings: enable ${provider} token profile`,
+        });
+        await props.reload();
+        await refreshKeyConfiguredProviders();
+        setModalProvider(null);
+        setModelStatus("Token saved. Now pick a model below.");
+      } catch (err) {
+        props.onError(String(err));
+      } finally {
+        setBusyProvider(null);
+      }
+    },
+    [props, loadFreshBaseHash, refreshKeyConfiguredProviders]
+  );
+
   const clearSessionModelOverrides = React.useCallback(async () => {
     try {
       const listResult = await props.gw.request<{
@@ -330,6 +375,7 @@ export function useModelProvidersState(props: {
     isProviderConfigured,
     pasteFromClipboard,
     saveProviderApiKey,
+    saveProviderSetupToken,
     saveDefaultModel,
     toggleProviderFilter,
   };

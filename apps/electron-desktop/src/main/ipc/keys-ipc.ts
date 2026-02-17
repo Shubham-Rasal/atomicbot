@@ -3,7 +3,7 @@
  */
 import { ipcMain } from "electron";
 
-import { upsertApiKeyProfile } from "../keys/apiKeys";
+import { upsertApiKeyProfile, upsertTokenProfile } from "../keys/apiKeys";
 import { readAuthProfilesStore, resolveAuthProfilesPath } from "../keys/authProfilesStore";
 import type { RegisterParams } from "./types";
 
@@ -39,6 +39,24 @@ export function registerKeyHandlers(params: RegisterParams) {
     }
   );
 
+  ipcMain.handle(
+    "auth-set-setup-token",
+    async (_evt, p: { provider?: unknown; token?: unknown }) => {
+      const provider = typeof p?.provider === "string" ? p.provider.trim() : "";
+      const token = typeof p?.token === "string" ? p.token : "";
+      if (!provider) {
+        throw new Error("provider is required");
+      }
+      upsertTokenProfile({
+        stateDir: params.stateDir,
+        provider,
+        token,
+        profileName: "default",
+      });
+      return { ok: true } as const;
+    }
+  );
+
   ipcMain.handle("auth-has-api-key", async (_evt, p: { provider?: unknown }) => {
     const provider = typeof p?.provider === "string" ? p.provider.trim().toLowerCase() : "";
     if (!provider) {
@@ -51,6 +69,9 @@ export function registerKeyHandlers(params: RegisterParams) {
         (profile.type === "api_key" &&
           profile.provider === provider &&
           profile.key.trim().length > 0) ||
+        (profile.type === "token" &&
+          profile.provider === provider &&
+          profile.token.trim().length > 0) ||
         (profile.type === "oauth" && profile.provider === provider)
     );
     return { configured } as const;

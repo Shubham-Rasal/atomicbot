@@ -24,8 +24,11 @@ const EXPECTED_CHANNELS = [
   "gateway-retry",
   // auth
   "auth-set-api-key",
+  "auth-set-setup-token",
   "auth-validate-api-key",
   "auth-has-api-key",
+  // oauth
+  "oauth:login",
   // memo
   "memo-check",
   // remindctl

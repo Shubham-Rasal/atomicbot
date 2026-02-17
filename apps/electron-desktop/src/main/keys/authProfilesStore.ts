@@ -11,6 +11,13 @@ export type ApiKeyProfile = {
   key: string;
 };
 
+export type TokenProfile = {
+  type: "token";
+  provider: string;
+  /** The setup token (e.g. Anthropic setup-token from `claude setup-token`). */
+  token: string;
+};
+
 export type OAuthProfile = {
   type: "oauth";
   provider: string;
@@ -26,7 +33,7 @@ export type OAuthProfile = {
   [key: string]: unknown;
 };
 
-export type AuthProfile = ApiKeyProfile | OAuthProfile;
+export type AuthProfile = ApiKeyProfile | TokenProfile | OAuthProfile;
 
 export type AuthProfilesStore = {
   version: number;
@@ -71,6 +78,12 @@ export function readAuthProfilesStore(params: { authProfilesPath: string }): Aut
       const key = typeof v.key === "string" ? v.key : "";
       if (provider && key) {
         profiles[k] = { type: "api_key", provider, key };
+      }
+    } else if (type === "token") {
+      const provider = typeof v.provider === "string" ? v.provider : "";
+      const token = typeof v.token === "string" ? v.token : "";
+      if (provider && token) {
+        profiles[k] = { type: "token", provider, token };
       }
     } else if (type === "oauth") {
       const provider = typeof v.provider === "string" ? v.provider : "";

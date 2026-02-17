@@ -6,22 +6,50 @@ import { GlassCard, HeroPageLayout, PrimaryButton, TextInput } from "@shared/kit
 import type { Provider } from "./ProviderSelectPage";
 import { MODEL_PROVIDER_BY_ID } from "@shared/models/providers";
 
+type AuthMode = "api_key" | "setup_token";
+
+const ANTHROPIC_SETUP_TOKEN_PREFIX = "sk-ant-oat01-";
+const ANTHROPIC_SETUP_TOKEN_MIN_LENGTH = 80;
+
+function validateSetupToken(raw: string): string | undefined {
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    return "Please paste your setup token";
+  }
+  if (!trimmed.startsWith(ANTHROPIC_SETUP_TOKEN_PREFIX)) {
+    return `Token should start with ${ANTHROPIC_SETUP_TOKEN_PREFIX}`;
+  }
+  if (trimmed.length < ANTHROPIC_SETUP_TOKEN_MIN_LENGTH) {
+    return "Token looks too short — paste the full setup-token";
+  }
+  return undefined;
+}
+
+/** Whether the provider supports a setup-token auth method in addition to API key. */
+function supportsSetupToken(provider: Provider): boolean {
+  return provider === "anthropic";
+}
+
 export function ApiKeyPage(props: {
   provider: Provider;
   status: string | null;
   error: string | null;
   busy: boolean;
   onSubmit: (apiKey: string) => void;
+  onSubmitSetupToken?: (token: string) => void;
   onBack: () => void;
 }) {
   const [apiKey, setApiKey] = React.useState("");
+  const [setupToken, setSetupToken] = React.useState("");
   const meta = MODEL_PROVIDER_BY_ID[props.provider];
   const totalSteps = 5;
   const activeStep = 1;
   const [errorText, setErrorText] = useState("");
   const [validating, setValidating] = useState(false);
+  const hasTokenMode = supportsSetupToken(props.provider);
+  const [authMode, setAuthMode] = useState<AuthMode>("api_key");
 
-  const handleSubmit = async () => {
+  const handleSubmitApiKey = async () => {
     if (errorText) {
       setErrorText("");
     }
@@ -31,7 +59,6 @@ export function ApiKeyPage(props: {
       return;
     }
 
-    // Validate the key against the provider API before saving
     setValidating(true);
     try {
       const result = await getDesktopApiOrNull()?.validateApiKey(props.provider, trimmed);
@@ -46,6 +73,28 @@ export function ApiKeyPage(props: {
     }
 
     props.onSubmit(trimmed);
+  };
+
+  const handleSubmitSetupToken = () => {
+    const err = validateSetupToken(setupToken);
+    if (err) {
+      setErrorText(err);
+      return;
+    }
+    props.onSubmitSetupToken?.(setupToken.trim());
+  };
+
+  const handleSubmit = () => {
+    if (authMode === "setup_token") {
+      handleSubmitSetupToken();
+    } else {
+      void handleSubmitApiKey();
+    }
+  };
+
+  const switchAuthMode = (mode: AuthMode) => {
+    setAuthMode(mode);
+    setErrorText("");
   };
 
   const isBusy = props.busy || validating;
@@ -64,43 +113,105 @@ export function ApiKeyPage(props: {
           ))}
         </div>
 
-        <div className={ob.UiApiKeyTitle}>Enter {meta.name} API Key</div>
-        <div className={ob.UiApiKeySubtitle}>
-          {meta.helpText}{" "}
-          {meta.helpUrl ? (
-            <a
-              href={meta.helpUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="UiLink"
-              onClick={(e) => {
-                e.preventDefault();
-                const url = meta.helpUrl;
-                if (!url) {
-                  return;
-                }
-                void getDesktopApiOrNull()?.openExternal(url);
-              }}
+        {hasTokenMode ? (
+          <div className={ob.UiAuthModeToggle} role="radiogroup" aria-label="Authentication method">
+            <button
+              type="button"
+              className={`${ob.UiAuthModeBtn} ${authMode === "api_key" ? ob["UiAuthModeBtn--active"] : ""}`}
+              onClick={() => switchAuthMode("api_key")}
+              disabled={isBusy}
             >
-              Get API key ↗
-            </a>
-          ) : null}
-        </div>
+              I have API key
+            </button>
+            <button
+              type="button"
+              className={`${ob.UiAuthModeBtn} ${authMode === "setup_token" ? ob["UiAuthModeBtn--active"] : ""}`}
+              onClick={() => switchAuthMode("setup_token")}
+              disabled={isBusy}
+            >
+              I have Claude subscription
+            </button>
+          </div>
+        ) : null}
 
-        <div className={ob.UiApiKeyInputRow}>
-          <TextInput
-            type="password"
-            value={apiKey}
-            onChange={setApiKey}
-            placeholder={meta.placeholder}
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            disabled={isBusy}
-            label={meta.name + " API key"}
-            isError={errorText}
-          />
-        </div>
+        {authMode === "api_key" ? (
+          <>
+            <div className={ob.UiApiKeyTitle}>Enter {meta.name} API Key</div>
+            <div className={ob.UiApiKeySubtitle}>
+              {meta.helpText}{" "}
+              {meta.helpUrl ? (
+                <a
+                  href={meta.helpUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="UiLink"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const url = meta.helpUrl;
+                    if (!url) {
+                      return;
+                    }
+                    void getDesktopApiOrNull()?.openExternal(url);
+                  }}
+                >
+                  Get API key ↗
+                </a>
+              ) : null}
+            </div>
+
+            <div className={ob.UiApiKeyInputRow}>
+              <TextInput
+                type="password"
+                value={apiKey}
+                onChange={setApiKey}
+                placeholder={meta.placeholder}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={isBusy}
+                label={meta.name + " API key"}
+                isError={errorText}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={ob.UiApiKeyTitle}>Paste Claude Setup Token</div>
+            <div className={ob.UiApiKeySubtitle}>
+              Run <code className={ob.UiInlineCode}>claude setup-token</code> in your terminal, then
+              paste the generated token below.{" "}
+              <a
+                href="https://docs.anthropic.com/en/docs/claude-code/setup-token"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="UiLink"
+                onClick={(e) => {
+                  e.preventDefault();
+                  void getDesktopApiOrNull()?.openExternal(
+                    "https://docs.anthropic.com/en/docs/claude-code/setup-token"
+                  );
+                }}
+              >
+                Learn more ↗
+              </a>
+            </div>
+
+            <div className={ob.UiApiKeyInputRow}>
+              <TextInput
+                type="password"
+                value={setupToken}
+                onChange={setSetupToken}
+                placeholder="sk-ant-oat01-..."
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                disabled={isBusy}
+                label="Anthropic setup token"
+                isError={errorText}
+              />
+            </div>
+          </>
+        )}
 
         <div className={ob.UiApiKeySpacer} aria-hidden="true" />
 
@@ -108,12 +219,7 @@ export function ApiKeyPage(props: {
           <button className="UiTextButton" disabled={isBusy} onClick={props.onBack} type="button">
             Back
           </button>
-          <PrimaryButton
-            size={"sm"}
-            disabled={isBusy}
-            loading={validating}
-            onClick={() => void handleSubmit()}
-          >
+          <PrimaryButton size={"sm"} disabled={isBusy} loading={validating} onClick={handleSubmit}>
             {validating ? "Validating…" : props.busy ? "Saving…" : "Continue"}
           </PrimaryButton>
         </div>

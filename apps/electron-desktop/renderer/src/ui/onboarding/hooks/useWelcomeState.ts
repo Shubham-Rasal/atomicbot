@@ -69,7 +69,7 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
   const { loadModels, models, modelsError, modelsLoading, onModelSelect, saveDefaultModel } =
     useWelcomeModels({ ...commonDeps, goSkills: nav.goSkills });
 
-  const { saveApiKey, onMediaProviderKeySubmit } = useWelcomeApiKey({
+  const { saveApiKey, saveSetupToken, onMediaProviderKeySubmit } = useWelcomeApiKey({
     ...commonDeps,
     loadModels,
     refreshProviderFlags,
@@ -213,6 +213,28 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
     [selectedProvider, saveApiKey, loadModels, nav.goModelSelect, setError]
   );
 
+  const onSetupTokenSubmit = React.useCallback(
+    async (token: string) => {
+      if (!selectedProvider) {
+        return;
+      }
+      setApiKeyBusy(true);
+      setError(null);
+      try {
+        const ok = await saveSetupToken(selectedProvider, token);
+        if (ok) {
+          await loadModels();
+          nav.goModelSelect();
+        }
+      } catch (err) {
+        setError(String(err));
+      } finally {
+        setApiKeyBusy(false);
+      }
+    },
+    [selectedProvider, saveSetupToken, loadModels, nav.goModelSelect, setError]
+  );
+
   return {
     // Skill busy flags
     appleNotesBusy: skillState.appleNotesBusy,
@@ -287,6 +309,7 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
     finish,
     goMediaUnderstanding,
     onApiKeySubmit,
+    onSetupTokenSubmit,
     onModelSelect,
     onOAuthSuccess,
     onProviderSelect,
