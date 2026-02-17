@@ -48,7 +48,10 @@ export function registerKeyHandlers(params: RegisterParams) {
     const store = readAuthProfilesStore({ authProfilesPath });
     const configured = Object.values(store.profiles).some(
       (profile) =>
-        profile.type === "api_key" && profile.provider === provider && profile.key.trim().length > 0
+        (profile.type === "api_key" &&
+          profile.provider === provider &&
+          profile.key.trim().length > 0) ||
+        (profile.type === "oauth" && profile.provider === provider)
     );
     return { configured } as const;
   });

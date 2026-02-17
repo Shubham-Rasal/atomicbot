@@ -6,6 +6,7 @@ import { routes } from "../app/routes";
 import { GlassCard, HeroPageLayout, PrimaryButton } from "@shared/kit";
 import { LoadingScreen } from "./LoadingScreen";
 import { ApiKeyPage } from "./providers/ApiKeyPage";
+import { OAuthProviderPage } from "./providers/OAuthProviderPage";
 import { AppleNotesConnectPage } from "./connections/AppleNotesConnectPage";
 import { AppleRemindersConnectPage } from "./connections/AppleRemindersConnectPage";
 import { GogPage } from "./skills/GogPage";
@@ -108,6 +109,21 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
               error={welcome.error}
               busy={welcome.apiKeyBusy}
               onSubmit={welcome.onApiKeySubmit}
+              onBack={welcome.goProviderSelect}
+            />
+          ) : (
+            <Navigate to={`${routes.welcome}/provider-select`} replace />
+          )
+        }
+      />
+
+      <Route
+        path="oauth-provider"
+        element={
+          welcome.selectedProvider ? (
+            <OAuthProviderPage
+              provider={welcome.selectedProvider}
+              onSuccess={(profileId) => void welcome.onOAuthSuccess(profileId)}
               onBack={welcome.goProviderSelect}
             />
           ) : (

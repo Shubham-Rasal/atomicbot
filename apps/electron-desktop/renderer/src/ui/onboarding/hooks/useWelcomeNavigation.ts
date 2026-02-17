@@ -13,6 +13,10 @@ export function useWelcomeNavigation(navigate: NavigateFunction) {
     void navigate(`${routes.welcome}/api-key`);
   }, [navigate]);
 
+  const goOAuthProvider = useCallback(() => {
+    void navigate(`${routes.welcome}/oauth-provider`);
+  }, [navigate]);
+
   const goModelSelect = useCallback(() => {
     void navigate(`${routes.welcome}/model-select`);
   }, [navigate]);
@@ -96,6 +100,7 @@ export function useWelcomeNavigation(navigate: NavigateFunction) {
 
   return {
     goApiKey,
+    goOAuthProvider,
     goAppleNotes,
     goAppleReminders,
     goConnections,

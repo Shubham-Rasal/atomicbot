@@ -11,7 +11,22 @@ export type ApiKeyProfile = {
   key: string;
 };
 
-export type AuthProfile = ApiKeyProfile;
+export type OAuthProfile = {
+  type: "oauth";
+  provider: string;
+  /** OAuth refresh token. */
+  refresh?: string;
+  /** OAuth access token. */
+  access?: string;
+  /** Token expiry timestamp (ms since epoch). */
+  expires?: number;
+  /** Account email returned by the provider. */
+  email?: string;
+  /** Arbitrary extra fields from the provider's OAuthCredentials. */
+  [key: string]: unknown;
+};
+
+export type AuthProfile = ApiKeyProfile | OAuthProfile;
 
 export type AuthProfilesStore = {
   version: number;
@@ -57,6 +72,22 @@ export function readAuthProfilesStore(params: { authProfilesPath: string }): Aut
       if (provider && key) {
         profiles[k] = { type: "api_key", provider, key };
       }
+    } else if (type === "oauth") {
+      const provider = typeof v.provider === "string" ? v.provider : "";
+      if (provider) {
+        const oauthProfile: OAuthProfile = { type: "oauth", provider };
+        if (typeof v.refresh === "string") oauthProfile.refresh = v.refresh;
+        if (typeof v.access === "string") oauthProfile.access = v.access;
+        if (typeof v.expires === "number") oauthProfile.expires = v.expires;
+        if (typeof v.email === "string") oauthProfile.email = v.email;
+        // Preserve arbitrary extra fields from the provider.
+        for (const [fk, fv] of Object.entries(v)) {
+          if (!["type", "provider", "refresh", "access", "expires", "email"].includes(fk)) {
+            oauthProfile[fk] = fv;
+          }
+        }
+        profiles[k] = oauthProfile;
+      }
     }
   }
 
@@ -73,6 +104,53 @@ export function readAuthProfilesStore(params: { authProfilesPath: string }): Aut
   }
 
   return { version, profiles, order };
+}
+
+/**
+ * Upsert an OAuth profile into auth-profiles.json.
+ * Stores full credential data (tokens, expiry, email, extras)
+ * so the gateway can use them for API authentication.
+ */
+export function upsertOAuthProfile(params: {
+  stateDir: string;
+  provider: string;
+  credentials: Record<string, unknown>;
+  profileName?: string;
+  agentId?: string;
+}): { profileId: string; authProfilesPath: string } {
+  const provider = params.provider.trim().toLowerCase();
+  if (!provider) {
+    throw new Error("provider is required");
+  }
+
+  const email =
+    typeof params.credentials.email === "string" && params.credentials.email.trim()
+      ? params.credentials.email.trim()
+      : params.profileName?.trim() || "default";
+  const profileId = `${provider}:${email}`;
+  const authProfilesPath = resolveAuthProfilesPath({
+    stateDir: params.stateDir,
+    agentId: params.agentId,
+  });
+
+  const store = readAuthProfilesStore({ authProfilesPath });
+  const profile: OAuthProfile = {
+    type: "oauth",
+    provider,
+    ...params.credentials,
+  };
+  const profiles = { ...store.profiles, [profileId]: profile };
+  const order = { ...store.order };
+  const prev = Array.isArray(order[provider]) ? order[provider] : [];
+  const filtered = prev.filter((x) => x !== profileId);
+  order[provider] = [profileId, ...filtered];
+
+  writeAuthProfilesStoreAtomic({
+    authProfilesPath,
+    store: { version: store.version, profiles, order },
+  });
+
+  return { profileId, authProfilesPath };
 }
 
 export function writeAuthProfilesStoreAtomic(params: {

@@ -43,6 +43,9 @@ declare global {
         apiKey: string
       ) => Promise<{ valid: boolean; error?: string }>;
       authHasApiKey: (provider: string) => Promise<{ configured: boolean }>;
+      // OAuth login (runs full flow in main process, opens browser automatically)
+      oauthLogin: (provider: string) => Promise<{ ok: true; profileId: string }>;
+      onOAuthProgress: (cb: (payload: { provider: string; message: string }) => void) => () => void;
       gogAuthList: () => Promise<GogExecResult>;
       gogAuthAdd: (params: {
         account: string;

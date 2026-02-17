@@ -19,6 +19,7 @@ import {
 import type { ConfigData } from "@store/slices/configSlice";
 import { ProviderTile } from "./ProviderTile";
 import { ApiKeyModalContent } from "./ApiKeyModalContent";
+import { OAuthModalContent } from "./OAuthModalContent";
 import { useModelProvidersState } from "./useModelProvidersState";
 
 type GatewayRpc = {
@@ -49,20 +50,34 @@ export function ModelProvidersTab(props: {
 
       {view === "models" ? <ModelsView state={state} /> : <ProvidersView state={state} />}
 
-      {/* ── API key modal ──────────────────────────────── */}
+      {/* ── Provider auth modal (API key or OAuth) ──── */}
       <Modal
         open={!!state.modalProviderInfo}
         onClose={() => state.setModalProvider(null)}
-        aria-label="Enter API key"
+        aria-label={
+          state.modalProviderInfo?.authType === "oauth" ? "Sign in to provider" : "Enter API key"
+        }
       >
         {state.modalProviderInfo ? (
-          <ApiKeyModalContent
-            provider={state.modalProviderInfo}
-            busy={state.busyProvider === state.modalProviderInfo.id}
-            onSave={(key) => void state.saveProviderApiKey(state.modalProviderInfo!.id, key)}
-            onPaste={state.pasteFromClipboard}
-            onClose={() => state.setModalProvider(null)}
-          />
+          state.modalProviderInfo.authType === "oauth" ? (
+            <OAuthModalContent
+              provider={state.modalProviderInfo}
+              configHash={typeof props.configSnap?.hash === "string" ? props.configSnap.hash : null}
+              onSuccess={() => {
+                state.setModalProvider(null);
+                void props.reload();
+              }}
+              onClose={() => state.setModalProvider(null)}
+            />
+          ) : (
+            <ApiKeyModalContent
+              provider={state.modalProviderInfo}
+              busy={state.busyProvider === state.modalProviderInfo.id}
+              onSave={(key) => void state.saveProviderApiKey(state.modalProviderInfo!.id, key)}
+              onPaste={state.pasteFromClipboard}
+              onClose={() => state.setModalProvider(null)}
+            />
+          )
         ) : null}
       </Modal>
     </div>

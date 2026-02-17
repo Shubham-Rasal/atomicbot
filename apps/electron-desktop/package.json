@@ -82,6 +82,7 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "@mariozechner/pi-ai": "0.52.12",
     "electron-updater": "^6.7.3",
     "json5": "^2.2.3",
     "jszip": "^3.10.1",

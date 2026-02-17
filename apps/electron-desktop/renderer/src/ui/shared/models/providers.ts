@@ -2,6 +2,7 @@ export type ModelProvider =
   | "anthropic"
   | "google"
   | "openai"
+  | "openai-codex"
   | "openrouter"
   | "xai"
   | "zai"
@@ -12,16 +13,20 @@ export type ModelProviderInfo = {
   name: string;
   description: string;
   recommended?: boolean;
-  placeholder: string;
+  /** Placeholder text for the API key input. Not needed for OAuth providers. */
+  placeholder?: string;
   popular?: boolean;
   helpUrl?: string;
   helpText?: string;
+  /** Authentication type. Defaults to "api_key" when omitted. */
+  authType?: "api_key" | "oauth";
 };
 
 export const PROVIDER_ICONS: Record<ModelProvider, string> = {
   anthropic: "anthropic.svg",
   // Note: filename kept as-is to match assets folder.
   openai: "openai.svg",
+  "openai-codex": "openai-codex.svg",
   google: "gemini.svg",
   minimax: "minimax.svg",
   xai: "xai.svg",
@@ -73,6 +78,14 @@ export const MODEL_PROVIDERS: ModelProviderInfo[] = [
     helpText: "Get your API key from the OpenAI Platform.",
   },
   {
+    id: "openai-codex",
+    name: "OpenAI Codex",
+    description: "Use your ChatGPT subscription for coding models",
+    authType: "oauth",
+    helpUrl: "https://openai.com/codex/",
+    helpText: "Sign in with your ChatGPT account.",
+  },
+  {
     id: "xai",
     name: "xAI (Grok)",
     description: "High-performance reasoning model by xAI with web search capabilities",
@@ -103,6 +116,7 @@ export const MODEL_PROVIDER_BY_ID: Record<ModelProvider, ModelProviderInfo> = {
   openrouter: MODEL_PROVIDERS.find((p) => p.id === "openrouter")!,
   google: MODEL_PROVIDERS.find((p) => p.id === "google")!,
   openai: MODEL_PROVIDERS.find((p) => p.id === "openai")!,
+  "openai-codex": MODEL_PROVIDERS.find((p) => p.id === "openai-codex")!,
   xai: MODEL_PROVIDERS.find((p) => p.id === "xai")!,
   zai: MODEL_PROVIDERS.find((p) => p.id === "zai")!,
   minimax: MODEL_PROVIDERS.find((p) => p.id === "minimax")!,

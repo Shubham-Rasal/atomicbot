@@ -14,6 +14,7 @@ import { registerRemindctlHandlers } from "./remindctl-ipc";
 import { registerObsidianHandlers } from "./obsidian-ipc";
 import { registerGhHandlers } from "./gh-ipc";
 import { registerConfigHandlers } from "./config-ipc";
+import { registerOAuthHandlers } from "./oauth-ipc";
 import { registerUpdaterIpcHandlers } from "./updater-ipc";
 import { registerSkillHandlers } from "./skills-ipc";
 
@@ -27,6 +28,7 @@ export function registerIpcHandlers(params: RegisterParams) {
   registerObsidianHandlers(params);
   registerGhHandlers(params);
   registerConfigHandlers(params);
+  registerOAuthHandlers(params);
   registerUpdaterIpcHandlers();
   registerSkillHandlers(params);
 
