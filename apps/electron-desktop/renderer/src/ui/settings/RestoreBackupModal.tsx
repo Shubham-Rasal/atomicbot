@@ -28,8 +28,11 @@ export function RestoreBackupModal(props: {
 
   const handleFile = React.useCallback(
     async (file: File) => {
-      if (!file.name.toLowerCase().endsWith(".zip")) {
-        setError("Please upload a .zip file");
+      const lower = file.name.toLowerCase();
+      const supported =
+        lower.endsWith(".zip") || lower.endsWith(".tar.gz") || lower.endsWith(".tgz");
+      if (!supported) {
+        setError("Please upload a .zip or .tar.gz file");
         setState("error");
         return;
       }
@@ -48,7 +51,7 @@ export function RestoreBackupModal(props: {
           throw new Error("API not available");
         }
 
-        const result = await api.restoreBackup(base64);
+        const result = await api.restoreBackup(base64, file.name);
         if (!result.ok) {
           throw new Error(result.error || "Restore failed");
         }
@@ -122,7 +125,7 @@ export function RestoreBackupModal(props: {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".zip"
+        accept=".zip,.gz,.tgz"
         style={{ display: "none" }}
         onChange={onFileInputChange}
       />
@@ -142,7 +145,7 @@ export function RestoreBackupModal(props: {
           </>
         ) : (
           <>
-            <div className={s.UiRestoreDropZoneTitle}>Drag backup ZIP here</div>
+            <div className={s.UiRestoreDropZoneTitle}>Drag backup archive here</div>
             <div className={s.UiRestoreDropZoneSubtext}>
               Or{" "}
               <button type="button" className={s.UiRestoreChooseFileLink} onClick={openFilePicker}>

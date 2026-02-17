@@ -2,19 +2,24 @@
  * IPC handlers for full config backup (create) and restore.
  *
  * - backup-create: zips the stateDir and lets the user pick a save location.
- * - backup-restore: receives a base64-encoded zip, validates it, swaps config,
- *   and restarts the gateway.
+ * - backup-restore: receives a base64-encoded archive (zip or tar.gz),
+ *   validates it, swaps config, and restarts the gateway.
  */
 import { app, dialog, ipcMain } from "electron";
+import { execFile } from "node:child_process";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
+import { promisify } from "node:util";
 
+import JSON5 from "json5";
 import JSZip from "jszip";
 import type { RegisterParams } from "./types";
 import { readGatewayTokenFromConfig } from "../gateway/config";
+
+const execFileAsync = promisify(execFile);
 
 /**
  * Recursively add every file/dir inside `dirPath` to a JSZip instance.
@@ -91,8 +96,193 @@ async function extractZipBuffer(buffer: Buffer, destDir: string): Promise<void> 
   }
 }
 
+/**
+ * Extract a tar.gz buffer into destDir using the system `tar` command.
+ * Writes the buffer to a temp file, extracts, then cleans up.
+ */
+async function extractTarGzBuffer(buffer: Buffer, destDir: string): Promise<void> {
+  const tmpTar = path.join(os.tmpdir(), `openclaw-tgz-${randomBytes(8).toString("hex")}.tar.gz`);
+  await fsp.writeFile(tmpTar, buffer);
+  try {
+    await execFileAsync("tar", ["-xzf", tmpTar, "-C", destDir]);
+  } finally {
+    await fsp.rm(tmpTar, { force: true }).catch(() => {});
+  }
+}
+
+type ArchiveFormat = "zip" | "tar.gz";
+
+/** Detect archive format from magic bytes in the buffer header. */
+function detectArchiveFormat(buffer: Buffer): ArchiveFormat | null {
+  if (buffer.length < 4) return null;
+  // ZIP: starts with PK (0x50 0x4B)
+  if (buffer[0] === 0x50 && buffer[1] === 0x4b) return "zip";
+  // GZIP: starts with 0x1F 0x8B
+  if (buffer[0] === 0x1f && buffer[1] === 0x8b) return "tar.gz";
+  return null;
+}
+
+/** Extract an archive buffer (zip or tar.gz) into destDir. */
+async function extractArchiveBuffer(
+  buffer: Buffer,
+  destDir: string,
+  filenameHint?: string
+): Promise<void> {
+  const format = detectArchiveFormat(buffer);
+  if (format === "zip") {
+    return extractZipBuffer(buffer, destDir);
+  }
+  if (format === "tar.gz") {
+    return extractTarGzBuffer(buffer, destDir);
+  }
+  // Fallback: try to guess from filename if magic bytes are inconclusive
+  if (filenameHint) {
+    const lower = filenameHint.toLowerCase();
+    if (lower.endsWith(".tar.gz") || lower.endsWith(".tgz")) {
+      return extractTarGzBuffer(buffer, destDir);
+    }
+    if (lower.endsWith(".zip")) {
+      return extractZipBuffer(buffer, destDir);
+    }
+  }
+  throw new Error("Unsupported archive format. Please use .zip or .tar.gz");
+}
+
+/**
+ * Read the backup's openclaw.json and derive the old stateDir
+ * from the workspace path (its parent directory).
+ * Returns null when the old stateDir cannot be determined.
+ */
+function detectOldStateDir(configPath: string): string | null {
+  try {
+    if (!fs.existsSync(configPath)) return null;
+    const text = fs.readFileSync(configPath, "utf-8");
+    const cfg = JSON5.parse(text);
+    if (!cfg || typeof cfg !== "object") return null;
+
+    // Prefer agents.defaults.workspace
+    const defaultWs = cfg.agents?.defaults?.workspace;
+    if (typeof defaultWs === "string" && defaultWs.length > 0) {
+      return path.posix.dirname(defaultWs.replaceAll("\\", "/"));
+    }
+
+    // Fallback: first agent entry with a workspace
+    if (Array.isArray(cfg.agents?.list)) {
+      for (const agent of cfg.agents.list) {
+        if (agent && typeof agent.workspace === "string") {
+          return path.posix.dirname(agent.workspace.replaceAll("\\", "/"));
+        }
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Recursively walk every file under `dir` and replace all occurrences of
+ * `oldStr` with `newStr` in text files. Binary files (containing null bytes
+ * in the first 8 KB) are skipped.
+ */
+async function rewritePathsInDir(dir: string, oldStr: string, newStr: string): Promise<number> {
+  let count = 0;
+  const entries = await fsp.readdir(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      count += await rewritePathsInDir(fullPath, oldStr, newStr);
+    } else if (entry.isFile()) {
+      try {
+        const buf = await fsp.readFile(fullPath);
+        // Skip binary files
+        const sample = buf.subarray(0, 8192);
+        if (sample.includes(0)) continue;
+
+        const text = buf.toString("utf-8");
+        if (text.includes(oldStr)) {
+          await fsp.writeFile(fullPath, text.replaceAll(oldStr, newStr), "utf-8");
+          count++;
+        }
+      } catch {
+        // skip unreadable/unwritable files
+      }
+    }
+  }
+  return count;
+}
+
+/**
+ * After restoring a backup, patch the config so it works correctly
+ * in the current Electron desktop environment:
+ * - Rewrite workspace paths to the current stateDir
+ * - Ensure gateway is in local/loopback mode
+ * - Allow "null" origin (Electron renderer loads from file://)
+ * - Disable device auth (desktop app uses token auth)
+ */
+function patchRestoredConfig(configPath: string, currentStateDir: string): void {
+  try {
+    if (!fs.existsSync(configPath)) return;
+
+    const text = fs.readFileSync(configPath, "utf-8");
+    const cfg = JSON5.parse(text);
+    if (!cfg || typeof cfg !== "object") return;
+
+    const defaultWorkspace = path.join(currentStateDir, "workspace");
+
+    // ── Workspace paths ───────────────────────────────────────────────
+    if (typeof cfg.agents?.defaults?.workspace === "string") {
+      cfg.agents.defaults.workspace = defaultWorkspace;
+    }
+
+    if (Array.isArray(cfg.agents?.list)) {
+      for (const agent of cfg.agents.list) {
+        if (agent && typeof agent.workspace === "string") {
+          const agentId = typeof agent.id === "string" ? agent.id.trim() : "";
+          const isDefault = agent.default === true || agentId === "main";
+          agent.workspace = isDefault
+            ? defaultWorkspace
+            : path.join(currentStateDir, `workspace-${agentId || "unknown"}`);
+        }
+      }
+    }
+
+    // ── Gateway settings for Electron desktop ─────────────────────────
+    if (!cfg.gateway || typeof cfg.gateway !== "object") {
+      cfg.gateway = {};
+    }
+    cfg.gateway.mode = "local";
+    cfg.gateway.bind = "loopback";
+
+    if (!cfg.gateway.controlUi || typeof cfg.gateway.controlUi !== "object") {
+      cfg.gateway.controlUi = {};
+    }
+    const allowedOrigins: unknown[] = Array.isArray(cfg.gateway.controlUi.allowedOrigins)
+      ? cfg.gateway.controlUi.allowedOrigins
+      : [];
+    if (!allowedOrigins.includes("null")) {
+      allowedOrigins.push("null");
+    }
+    cfg.gateway.controlUi.allowedOrigins = allowedOrigins;
+    cfg.gateway.controlUi.dangerouslyDisableDeviceAuth = true;
+
+    fs.writeFileSync(configPath, `${JSON.stringify(cfg, null, 2)}\n`, "utf-8");
+    console.log("[ipc/backup] patched restored config for desktop environment");
+  } catch (err) {
+    console.warn("[ipc/backup] patchRestoredConfig failed:", err);
+  }
+}
+
 export function registerBackupHandlers(params: RegisterParams) {
-  const { stateDir, stopGatewayChild, startGateway, getMainWindow, setGatewayToken } = params;
+  const {
+    stateDir,
+    stopGatewayChild,
+    startGateway,
+    getMainWindow,
+    setGatewayToken,
+    acceptConsent,
+  } = params;
 
   // ── Create backup ──────────────────────────────────────────────────────
   ipcMain.handle("backup-create", async () => {
@@ -132,20 +322,21 @@ export function registerBackupHandlers(params: RegisterParams) {
   });
 
   // ── Restore from backup ────────────────────────────────────────────────
-  ipcMain.handle("backup-restore", async (_evt, p: { data?: unknown }) => {
+  ipcMain.handle("backup-restore", async (_evt, p: { data?: unknown; filename?: unknown }) => {
     const b64 = typeof p?.data === "string" ? p.data : "";
     if (!b64) {
       return { ok: false, error: "No data provided" };
     }
+    const filenameHint = typeof p?.filename === "string" ? p.filename : undefined;
 
     const tmpDir = path.join(os.tmpdir(), `openclaw-restore-${randomBytes(8).toString("hex")}`);
     const preRestoreDir = `${stateDir}.pre-restore`;
 
     try {
-      // 1. Extract zip to temp dir and validate
+      // 1. Extract archive to temp dir and validate
       const buffer = Buffer.from(b64, "base64");
       await fsp.mkdir(tmpDir, { recursive: true });
-      await extractZipBuffer(buffer, tmpDir);
+      await extractArchiveBuffer(buffer, tmpDir, filenameHint);
       const backupRoot = await resolveBackupRoot(tmpDir);
 
       // 2. Stop the gateway
@@ -163,15 +354,33 @@ export function registerBackupHandlers(params: RegisterParams) {
       await fsp.mkdir(stateDir, { recursive: true });
       await fsp.cp(backupRoot, stateDir, { recursive: true });
 
-      // 5. Read the token from the restored config and update in-memory state
-      //    so gateway, main process, and renderer all use the backup's token.
+      // 5. Detect old stateDir from backup config and rewrite stale
+      //    paths across all restored text files (sessions, logs, etc.)
       const configPath = path.join(stateDir, "openclaw.json");
+      const oldStateDir = detectOldStateDir(configPath);
+      if (oldStateDir && oldStateDir !== stateDir) {
+        const rewritten = await rewritePathsInDir(stateDir, oldStateDir, stateDir);
+        console.log(
+          `[ipc/backup] rewrote paths in ${rewritten} file(s): ${oldStateDir} → ${stateDir}`
+        );
+      }
+
+      // 6. Patch config for the desktop environment (workspace paths,
+      //    gateway mode, controlUi origin allowlist)
+      patchRestoredConfig(configPath, stateDir);
+
+      // 7. Read the token from the restored config and update in-memory state
+      //    so gateway, main process, and renderer all use the backup's token.
       const restoredToken = readGatewayTokenFromConfig(configPath);
       if (restoredToken) {
         setGatewayToken(restoredToken);
       }
 
-      // 6. Start the gateway — it reads the token from config + env var (now in sync)
+      // 8. Mark terms of service as accepted so the gateway starts without
+      //    requiring the user to re-accept consent after a backup restore.
+      await acceptConsent();
+
+      // 9. Start the gateway — it reads the token from config + env var (now in sync)
       await startGateway();
 
       return { ok: true };
