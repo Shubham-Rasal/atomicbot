@@ -75,76 +75,46 @@ function run(argv) {
 
   var cv = win.contentView;
 
-  // ---- UI via Auto Layout (perfect centering) ----
-  // Stack: [spinner] [title] [subtitle]
-  function makeLabelFullWidth(text, font, color) {
-    var field = $.NSTextField.alloc.initWithFrame($.NSMakeRect(0, 0, W, 24));
+  // ---- Spinner (40x40, centered) ----
+  var spinner = $.NSProgressIndicator.alloc.initWithFrame(
+    $.NSMakeRect((W - 40) / 2, 70, 40, 40)
+  );
+  spinner.style = 1; // NSProgressIndicatorStyleSpinning
+  spinner.displayedWhenStopped = false;
+  spinner.startAnimation(null);
+  cv.addSubview(spinner);
+
+  // ---- Helper: measure text width and create a centered label ----
+  function makeLabel(text, font, color, y, h) {
+    var attrs = $.NSDictionary.dictionaryWithObjectForKey(font, $.NSFontAttributeName);
+    var textW = $(text).sizeWithAttributes(attrs).width + 4;
+    var textX = (W - textW) / 2;
+    var field = $.NSTextField.alloc.initWithFrame($.NSMakeRect(textX, y, textW, h));
     field.stringValue = text;
-    field.bezeled = false;
-    field.drawsBackground = false;
-    field.editable = false;
-    field.selectable = false;
+    field.setBezeled(false);
+    field.setDrawsBackground(false);
+    field.setEditable(false);
+    field.setSelectable(false);
     field.textColor = color;
     field.font = font;
-    field.alignment = 1; // NSTextAlignmentCenter
-    field.lineBreakMode = 0; // NSLineBreakByWordWrapping
-    field.maximumNumberOfLines = 1;
-    field.translatesAutoresizingMaskIntoConstraints = false;
     return field;
   }
 
-  // Spinner
-  var spinner = $.NSProgressIndicator.alloc.initWithFrame($.NSMakeRect(0, 0, 40, 40));
-  spinner.style = 1; // NSProgressIndicatorStyleSpinning
-  spinner.displayedWhenStopped = false;
-  spinner.controlSize = 1; // NSControlSizeRegular
-  spinner.translatesAutoresizingMaskIntoConstraints = false;
-  spinner.startAnimation(null);
-
-  // Labels
-  var title = makeLabelFullWidth(
-    'Updating Atomic Bot\u2026',
+  // ---- Title label (manually centered) ----
+  cv.addSubview(makeLabel(
+    'Updating Atomic Bot\\u2026',
     $.NSFont.systemFontOfSizeWeight(16, 0.5),
-    $.NSColor.colorWithSRGBRedGreenBlueAlpha(0.9, 0.93, 0.95, 1.0)
-  );
+    $.NSColor.colorWithSRGBRedGreenBlueAlpha(0.9, 0.93, 0.95, 1.0),
+    26, 28
+  ));
 
-  var subtitle = makeLabelFullWidth(
-    'Please wait\u2026',
+  // ---- Subtitle (manually centered) ----
+  cv.addSubview(makeLabel(
+    'Please wait\\u2026',
     $.NSFont.systemFontOfSize(12),
-    $.NSColor.colorWithSRGBRedGreenBlueAlpha(0.55, 0.6, 0.65, 1.0)
-  );
-
-  // StackView (vertical): even spacing, content centered
-  var stack = $.NSStackView.alloc.initWithFrame($.NSMakeRect(0, 0, W, H));
-  stack.orientation = 1;   // NSUserInterfaceLayoutOrientationVertical
-  stack.alignment = 2;     // NSLayoutAttributeCenterX
-  stack.distribution = 4;   // NSStackViewDistributionEqualCentering
-  stack.spacing = 12;
-  stack.translatesAutoresizingMaskIntoConstraints = false;
-  stack.setContentHuggingPriorityForOrientation(1000, 1); // NSLayoutPriorityRequired, vertical
-
-  stack.addArrangedSubview(spinner);
-  stack.addArrangedSubview(title);
-  stack.addArrangedSubview(subtitle);
-
-  cv.addSubview(stack);
-
-  var c = cv;
-  c.addConstraint($.NSLayoutConstraint.constraintWithItemAttributeRelatedByToItemAttributeMultiplierConstant(
-    stack, 9, 0, c, 9, 1.0, 0.0
-  )); // centerX
-  c.addConstraint($.NSLayoutConstraint.constraintWithItemAttributeRelatedByToItemAttributeMultiplierConstant(
-    stack, 10, 0, c, 10, 1.0, 0.0
-  )); // centerY
-  c.addConstraint($.NSLayoutConstraint.constraintWithItemAttributeRelatedByToItemAttributeMultiplierConstant(
-    stack, 7, 0, c, 7, 1.0, 0.0
-  )); // stack.width = content.width
-  c.addConstraint($.NSLayoutConstraint.constraintWithItemAttributeRelatedByToItemAttributeMultiplierConstant(
-    title, 7, 0, stack, 7, 1.0, 0.0
-  )); // title.width = stack.width
-  c.addConstraint($.NSLayoutConstraint.constraintWithItemAttributeRelatedByToItemAttributeMultiplierConstant(
-    subtitle, 7, 0, stack, 7, 1.0, 0.0
-  )); // subtitle.width = stack.width
+    $.NSColor.colorWithSRGBRedGreenBlueAlpha(0.55, 0.6, 0.65, 1.0),
+    4, 20
+  ));
 
   // ---- Show ----
   // Manual centering via setFrameDisplayAnimate (performSelector('center')
