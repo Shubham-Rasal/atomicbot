@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 
 import { GlassCard, HeroPageLayout, PrimaryButton } from "@shared/kit";
-import ob from "./OnboardingProviders.module.css";
 
 import {
   MODEL_PROVIDERS,
@@ -31,19 +30,19 @@ export function ProviderSelectPage(props: {
 
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Provider selection">
-      <GlassCard className={`${ob.UiProviderCard} UiGlassCardOnboarding`}>
-        <div className={ob.UiOnboardingDots} aria-label="Onboarding progress">
+      <GlassCard className="UiProviderCard UiGlassCardOnboarding">
+        <div className="UiOnboardingDots" aria-label="Onboarding progress">
           {Array.from({ length: totalSteps }).map((_, idx) => (
             <span
               // eslint-disable-next-line react/no-array-index-key
               key={idx}
-              className={`${ob.UiOnboardingDot} ${idx === activeStep ? ob["UiOnboardingDot--active"] : ""}`}
+              className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
               aria-hidden="true"
             />
           ))}
         </div>
 
-        <div className="UiSectionTitle">Choose Al Provider</div>
+        <div className="UiSectionTitle">Choose AI Provider</div>
         <div className="UiSectionSubtitle">
           Pick the AI provider you want to start with. You can switch or add more providers later.
         </div>

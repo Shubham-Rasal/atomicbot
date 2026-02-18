@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
-import ob from "./OnboardingProviders.module.css";
 import { GlassCard, HeroPageLayout, PrimaryButton, TextInput } from "@shared/kit";
 import type { Provider } from "./ProviderSelectPage";
 import { MODEL_PROVIDER_BY_ID } from "@shared/models/providers";
@@ -101,23 +100,23 @@ export function ApiKeyPage(props: {
 
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="API key setup">
-      <GlassCard className={`${ob.UiApiKeyCard} UiGlassCardOnboarding`}>
-        <div className={ob.UiOnboardingDots} aria-label="Onboarding progress">
+      <GlassCard className="UiApiKeyCard UiGlassCardOnboarding">
+        <div className="UiOnboardingDots" aria-label="Onboarding progress">
           {Array.from({ length: totalSteps }).map((_, idx) => (
             <span
               // eslint-disable-next-line react/no-array-index-key
               key={idx}
-              className={`${ob.UiOnboardingDot} ${idx === activeStep ? ob["UiOnboardingDot--active"] : ""}`}
+              className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
               aria-hidden="true"
             />
           ))}
         </div>
 
         {hasTokenMode ? (
-          <div className={ob.UiAuthModeToggle} role="radiogroup" aria-label="Authentication method">
+          <div className="UiAuthModeToggle" role="radiogroup" aria-label="Authentication method">
             <button
               type="button"
-              className={`${ob.UiAuthModeBtn} ${authMode === "api_key" ? ob["UiAuthModeBtn--active"] : ""}`}
+              className={`UiAuthModeBtn ${authMode === "api_key" ? "UiAuthModeBtn--active" : ""}`}
               onClick={() => switchAuthMode("api_key")}
               disabled={isBusy}
             >
@@ -125,7 +124,7 @@ export function ApiKeyPage(props: {
             </button>
             <button
               type="button"
-              className={`${ob.UiAuthModeBtn} ${authMode === "setup_token" ? ob["UiAuthModeBtn--active"] : ""}`}
+              className={`UiAuthModeBtn ${authMode === "setup_token" ? "UiAuthModeBtn--active" : ""}`}
               onClick={() => switchAuthMode("setup_token")}
               disabled={isBusy}
             >
@@ -136,8 +135,8 @@ export function ApiKeyPage(props: {
 
         {authMode === "api_key" ? (
           <>
-            <div className={ob.UiApiKeyTitle}>Enter {meta.name} API Key</div>
-            <div className={ob.UiApiKeySubtitle}>
+            <div className="UiApiKeyTitle">Enter {meta.name} API Key</div>
+            <div className="UiApiKeySubtitle">
               {meta.helpText}{" "}
               {meta.helpUrl ? (
                 <a
@@ -159,7 +158,7 @@ export function ApiKeyPage(props: {
               ) : null}
             </div>
 
-            <div className={ob.UiApiKeyInputRow}>
+            <div className="UiApiKeyInputRow">
               <TextInput
                 type="password"
                 value={apiKey}
@@ -176,9 +175,9 @@ export function ApiKeyPage(props: {
           </>
         ) : (
           <>
-            <div className={ob.UiApiKeyTitle}>Paste Claude Setup Token</div>
-            <div className={ob.UiApiKeySubtitle}>
-              Run <code className={ob.UiInlineCode}>claude setup-token</code> in your terminal, then
+            <div className="UiApiKeyTitle">Paste Claude Setup Token</div>
+            <div className="UiApiKeySubtitle">
+              Run <code className="UiInlineCode">claude setup-token</code> in your terminal, then
               paste the generated token below.{" "}
               <a
                 href="https://docs.anthropic.com/en/docs/claude-code/setup-token"
@@ -196,7 +195,7 @@ export function ApiKeyPage(props: {
               </a>
             </div>
 
-            <div className={ob.UiApiKeyInputRow}>
+            <div className="UiApiKeyInputRow">
               <TextInput
                 type="password"
                 value={setupToken}
@@ -213,9 +212,9 @@ export function ApiKeyPage(props: {
           </>
         )}
 
-        <div className={ob.UiApiKeySpacer} aria-hidden="true" />
+        <div className="UiApiKeySpacer" aria-hidden="true" />
 
-        <div className={ob.UiApiKeyButtonRow}>
+        <div className="UiApiKeyButtonRow">
           <button className="UiTextButton" disabled={isBusy} onClick={props.onBack} type="button">
             Back
           </button>

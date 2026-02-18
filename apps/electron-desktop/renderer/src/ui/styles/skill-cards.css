@@ -195,6 +195,13 @@
   font-weight: 400;
   font-size: 13px;
   color: #8e8e8e;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 30px;
 }
 
 .UiSkillConnectButtonContainer {
@@ -221,19 +228,14 @@
 }
 
 .UiSkillConnectButtonConfigure {
-  color: #ffffff;
-  background:
-    linear-gradient(#353535, #353535) padding-box,
-    linear-gradient(
-        150deg,
-        rgba(255, 255, 255, 0.24) 0%,
-        rgba(255, 255, 255, 0) 50%,
-        rgba(255, 255, 255, 0.24) 100%
-      )
-      border-box;
-
-  border: 1px solid transparent;
   cursor: pointer;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--surface-tertiary);
+  color: #ffffff;
+  font-weight: 750;
+  transition: opacity var(--transition-base);
+  padding: 0 8px;
 }
 
 .UiSkillConnectButtonConfigure:hover {

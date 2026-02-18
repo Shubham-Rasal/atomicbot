@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
-import ob from "./OnboardingProviders.module.css";
 import { GlassCard, HeroPageLayout, PrimaryButton } from "@shared/kit";
 import { MODEL_PROVIDER_BY_ID, type ModelProvider } from "@shared/models/providers";
 
@@ -96,20 +95,20 @@ export function OAuthProviderPage(props: {
 
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="OAuth provider setup">
-      <GlassCard className={`${ob.UiApiKeyCard} UiGlassCardOnboarding`}>
-        <div className={ob.UiOnboardingDots} aria-label="Onboarding progress">
+      <GlassCard className="UiApiKeyCard UiGlassCardOnboarding">
+        <div className="UiOnboardingDots" aria-label="Onboarding progress">
           {Array.from({ length: totalSteps }).map((_, idx) => (
             <span
               // eslint-disable-next-line react/no-array-index-key
               key={idx}
-              className={`${ob.UiOnboardingDot} ${idx === activeStep ? ob["UiOnboardingDot--active"] : ""}`}
+              className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
               aria-hidden="true"
             />
           ))}
         </div>
 
-        <div className={ob.UiApiKeyTitle}>Sign in to {meta.name}</div>
-        <div className={ob.UiApiKeySubtitle}>
+        <div className="UiApiKeyTitle">Sign in to {meta.name}</div>
+        <div className="UiApiKeySubtitle">
           {meta.helpText}{" "}
           {meta.helpUrl ? (
             <a
@@ -130,7 +129,7 @@ export function OAuthProviderPage(props: {
           ) : null}
         </div>
 
-        {statusText && <div className={ob.UiApiKeySubtitle}>{statusText}</div>}
+        {statusText && <div className="UiApiKeySubtitle">{statusText}</div>}
 
         {error && (
           <div style={{ color: "var(--color-danger, #f44)", fontSize: 14, marginBottom: 8 }}>
@@ -138,9 +137,9 @@ export function OAuthProviderPage(props: {
           </div>
         )}
 
-        <div className={ob.UiApiKeySpacer} aria-hidden="true" />
+        <div className="UiApiKeySpacer" aria-hidden="true" />
 
-        <div className={ob.UiApiKeyButtonRow}>
+        <div className="UiApiKeyButtonRow">
           <button className="UiTextButton" disabled={isBusy} onClick={props.onBack} type="button">
             Back
           </button>

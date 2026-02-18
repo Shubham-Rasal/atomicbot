@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 
 import { GlassCard, HeroPageLayout, PrimaryButton } from "@shared/kit";
-import ob from "./OnboardingProviders.module.css";
 import {
   type ModelEntry,
   TIER_INFO,
@@ -9,7 +8,6 @@ import {
   getModelTier,
   sortModelsByProviderTierName,
 } from "@shared/models/modelPresentation";
-import { ModelProvider, resolveProviderIconUrl } from "@shared/models/providers";
 
 export function ModelSelectPage(props: {
   models: ModelEntry[];
@@ -44,12 +42,12 @@ export function ModelSelectPage(props: {
     return (
       <HeroPageLayout variant="compact" align="center" aria-label="Model selection">
         <GlassCard className="UiModelCard UiGlassCardOnboarding">
-          <div className={ob.UiOnboardingDots} aria-label="Onboarding progress">
+          <div className="UiOnboardingDots" aria-label="Onboarding progress">
             {Array.from({ length: totalSteps }).map((_, idx) => (
               <span
                 // eslint-disable-next-line react/no-array-index-key
                 key={idx}
-                className={`${ob.UiOnboardingDot} ${idx === activeStep ? ob["UiOnboardingDot--active"] : ""}`}
+                className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
                 aria-hidden="true"
               />
             ))}
@@ -67,12 +65,12 @@ export function ModelSelectPage(props: {
     return (
       <HeroPageLayout variant="compact" align="center" aria-label="Model selection">
         <GlassCard className="UiModelCard UiGlassCardOnboarding">
-          <div className={ob.UiOnboardingDots} aria-label="Onboarding progress">
+          <div className="UiOnboardingDots" aria-label="Onboarding progress">
             {Array.from({ length: totalSteps }).map((_, idx) => (
               <span
                 // eslint-disable-next-line react/no-array-index-key
                 key={idx}
-                className={`${ob.UiOnboardingDot} ${idx === activeStep ? ob["UiOnboardingDot--active"] : ""}`}
+                className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
                 aria-hidden="true"
               />
             ))}
@@ -94,12 +92,12 @@ export function ModelSelectPage(props: {
     return (
       <HeroPageLayout variant="compact" align="center" aria-label="Model selection">
         <GlassCard className="UiModelCard UiGlassCardOnboarding">
-          <div className={ob.UiOnboardingDots} aria-label="Onboarding progress">
+          <div className="UiOnboardingDots" aria-label="Onboarding progress">
             {Array.from({ length: totalSteps }).map((_, idx) => (
               <span
                 // eslint-disable-next-line react/no-array-index-key
                 key={idx}
-                className={`${ob.UiOnboardingDot} ${idx === activeStep ? ob["UiOnboardingDot--active"] : ""}`}
+                className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
                 aria-hidden="true"
               />
             ))}
@@ -123,12 +121,12 @@ export function ModelSelectPage(props: {
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Model selection">
       <GlassCard className="UiModelCard UiGlassCardOnboarding">
-        <div className={ob.UiOnboardingDots} aria-label="Onboarding progress">
+        <div className="UiOnboardingDots" aria-label="Onboarding progress">
           {Array.from({ length: totalSteps }).map((_, idx) => (
             <span
               // eslint-disable-next-line react/no-array-index-key
               key={idx}
-              className={`${ob.UiOnboardingDot} ${idx === activeStep ? ob["UiOnboardingDot--active"] : ""}`}
+              className={`UiOnboardingDot ${idx === activeStep ? "UiOnboardingDot--active" : ""}`}
               aria-hidden="true"
             />
           ))}
