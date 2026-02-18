@@ -125,6 +125,10 @@ jobs:
         working-directory: apps/electron-desktop
         run: npm run prepare:obsidian-cli:all
 
+      - name: Prepare whisper-cli runtime
+        working-directory: apps/electron-desktop
+        run: npm run prepare:whisper-cli:all
+
       # Determine if we should publish to GitHub Releases.
       - name: Determine publish mode
         id: publish-mode
