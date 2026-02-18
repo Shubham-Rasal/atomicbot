@@ -30,7 +30,7 @@
   flex-shrink: 0;
   width: 10px;
   height: 6px;
-  color: rgba(255, 255, 255, 0.4);
+  color: inherit;
   transition: transform var(--transition-fast, 120ms);
 }
 
