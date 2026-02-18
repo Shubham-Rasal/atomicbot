@@ -1,4 +1,4 @@
-# 🦞 OpenClaw — Personal AI Assistant
+# 🦞 Atomic Bot — The Fastest Way to Run OpenClaw
 
 <p align="center">
     <picture>
