@@ -257,32 +257,33 @@ app.on("before-quit", (event) => {
 
 void app.whenReady().then(async () => {
   const userData = app.getPath("userData");
-  const stateDir = path.join(userData, "openclaw");
-  gatewayStateDir = stateDir;
-  const whisperDataDir = path.join(userData, "whisper");
   const logsDir = path.join(userData, "logs");
   logsDirForUi = logsDir;
 
-  // Kill any orphaned gateway process left over from a previous crash / force-quit.
-  const killedPid = killOrphanedGateway(stateDir);
-  if (killedPid) {
-    console.log(`[main] Cleaned up orphaned gateway process (PID ${killedPid})`);
-  }
+  // ── Resolve stateDir with priority: 1) user override, 2) external gateway, 3) default ──
+  const stateDirOverridePath = path.join(userData, "state-dir-override.json");
+  const userOverrideDir = readStateDirOverride(stateDirOverridePath);
 
-  // Temporary: force-kill all lingering openclaw-gateway processes to prevent
-  // zombie instances. Safe because we are about to spawn a fresh one.
-  // TODO: remove after 1-2 releases once the orphan cleanup above is proven reliable.
-  try {
-    const { execSync } = await import("node:child_process");
-    execSync("pkill -9 openclaw-gateway", { stdio: "ignore" });
-    console.log("[main] pkill openclaw-gateway: killed lingering processes");
-  } catch {
-    // pkill exits non-zero when no matching processes found — expected.
-  }
+  let stateDir: string;
+  let externalGatewayDetected = false;
 
-  // Remove stale gateway lock file so the new spawn can acquire it.
-  const configPath = path.join(stateDir, "openclaw.json");
-  removeStaleGatewayLock(configPath);
+  if (userOverrideDir) {
+    stateDir = userOverrideDir;
+  } else {
+    // Check if an external gateway is already running on the default port.
+    const externalConfigPath = path.join(os.homedir(), ".openclaw", "openclaw.json");
+    const externalToken = readGatewayTokenFromConfig(externalConfigPath);
+    const externalGatewayAvailable = externalToken
+      ? await waitForPortOpen("127.0.0.1", DEFAULT_PORT, 3_000)
+      : false;
+
+    if (externalGatewayAvailable) {
+      stateDir = path.join(os.homedir(), ".openclaw");
+      externalGatewayDetected = true;
+    } else {
+      stateDir = path.join(userData, "openclaw");
+    }
+  }
 
   const openclawDir = app.isPackaged ? resolveBundledOpenClawDir() : resolveRepoRoot(MAIN_DIR);
   // In dev, prefer a real Node binary. Spawning the Gateway via the Electron binary (process.execPath)
@@ -433,6 +434,7 @@ void app.whenReady().then(async () => {
     startGateway,
     userData,
     stateDir,
+    stateDirOverridePath,
     logsDir,
     openclawDir,
     gogBin,
@@ -462,10 +464,29 @@ void app.whenReady().then(async () => {
     ghBin,
   });
 
-  // Always start the gateway on launch — consent is handled in the renderer
-  // after the gateway is ready (loading screen shows while gateway starts).
-  await startGateway();
+  // If consent has already been accepted previously, start the gateway immediately.
+  if (consentAccepted) {
+    await startGateway();
+  }
 });
+
+function readStateDirOverride(overridePath: string): string | null {
+  try {
+    if (!fs.existsSync(overridePath)) {
+      return null;
+    }
+    const raw = fs.readFileSync(overridePath, "utf-8");
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+    const obj = parsed as { stateDir?: unknown };
+    const dir = typeof obj.stateDir === "string" ? obj.stateDir.trim() : "";
+    return dir.length > 0 ? dir : null;
+  } catch {
+    return null;
+  }
+}
 
 function readConsentAccepted(consentPath: string): boolean {
   try {

@@ -106,7 +106,7 @@ function deriveStatusFromConfig(config: unknown): Record<SkillId, SkillStatus> {
     github: resolveSkillEntryStatus(cfg, "github"),
     slack: slackStatus,
     gemini: "coming-soon",
-    "nano-banana": "coming-soon",
+    "nano-banana": resolveSkillEntryStatus(cfg, "nano-banana-pro"),
     sag: "coming-soon",
   };
 }
@@ -120,6 +120,7 @@ const SKILLS_ENTRY_KEYS: Partial<Record<SkillId, string>> = {
   obsidian: "obsidian",
   github: "github",
   "google-workspace": "gog",
+  "nano-banana": "nano-banana-pro",
 };
 
 export async function disableSkill(
@@ -199,10 +200,12 @@ export function useSkillsStatus(props: {
     let cancelled = false;
     (async () => {
       try {
+<<<<<<< HEAD:apps/electron-desktop/renderer/src/ui/settings/skills/useSkillsStatus.ts
         const api = getDesktopApiOrNull();
-        if (!api) {
-          return;
-        }
+=======
+        const api = window.openclawDesktop;
+>>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.):apps/electron-desktop/renderer/src/ui/settings/useSkillsStatus.ts
+        if (!api) {return;}
         const res = await api.gogAuthList();
         if (cancelled) {
           return;

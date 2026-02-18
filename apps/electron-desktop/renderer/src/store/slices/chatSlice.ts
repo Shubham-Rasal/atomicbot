@@ -219,12 +219,15 @@ export function isApprovalContinueMessage(role: string, text: string): boolean {
 /** Detect heartbeat-related messages that should be hidden from the chat UI. */
 export function isHeartbeatMessage(role: string, text: string): boolean {
   const trimmed = text.trim();
-  if (!trimmed) {
-    return false;
-  }
+  if (!trimmed) {return false;}
+<<<<<<< HEAD
   // User-side: the heartbeat prompt injected by the gateway.
   // Use includes() because gateway may prepend metadata (date headers, etc.).
   if (role === "user" && trimmed.includes(HEARTBEAT_PROMPT_PREFIX)) {
+=======
+  // User-side: the heartbeat prompt injected by the gateway
+  if (role === "user" && trimmed.startsWith(HEARTBEAT_PROMPT_PREFIX)) {
+>>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.)
     return true;
   }
   // Assistant-side: HEARTBEAT_OK acknowledgment (possibly with light markup or surrounding text)
@@ -618,43 +621,12 @@ const chatSlice = createSlice({
         runId: string;
         seq: number;
         text: string;
-        toolCalls?: UiToolCall[];
+        attachments?: UiMessageAttachment[];
       }>
     ) {
-      const { runId, seq, text, toolCalls } = action.payload;
+      const { runId, seq, text, attachments } = action.payload;
       delete state.streamByRun[runId];
-
-      // Collect any live tool calls for this run and convert them to UiToolCall[]
-      const liveForRun: UiToolCall[] = [];
-      const liveResultsForRun: UiToolResult[] = [];
-      for (const key of Object.keys(state.liveToolCalls)) {
-        const ltc = state.liveToolCalls[key];
-        if (ltc.runId === runId) {
-          liveForRun.push({
-            id: ltc.toolCallId,
-            name: ltc.name,
-            arguments: ltc.arguments,
-          });
-          if (ltc.phase === "result" && ltc.resultText) {
-            liveResultsForRun.push({
-              toolCallId: ltc.toolCallId,
-              toolName: ltc.name,
-              text: ltc.resultText,
-              status: ltc.isError ? "error" : undefined,
-            });
-          }
-          delete state.liveToolCalls[key];
-        }
-      }
-
-      // Merge tool calls from payload with those collected from live events
-      const allToolCalls = [
-        ...(toolCalls ?? []),
-        ...liveForRun.filter((ltc) => !toolCalls?.some((tc) => tc.id === ltc.id)),
-      ];
-      const hasToolCalls = allToolCalls.length > 0;
-
-      if (!text && !hasToolCalls) {
+      if (!text && !attachments?.length) {
         return;
       }
       // Suppress heartbeat ack messages from appearing in chat history
@@ -664,11 +636,10 @@ const chatSlice = createSlice({
       state.messages.push({
         id: `a-${runId}-${seq}`,
         role: "assistant",
-        text,
+        text: text || (attachments?.length ? "" : ""),
         runId,
         ts: Date.now(),
-        toolCalls: hasToolCalls ? allToolCalls : undefined,
-        toolResults: liveResultsForRun.length > 0 ? liveResultsForRun : undefined,
+        attachments,
       });
     },
     streamErrorReceived(state, action: PayloadAction<{ runId: string; errorMessage?: string }>) {

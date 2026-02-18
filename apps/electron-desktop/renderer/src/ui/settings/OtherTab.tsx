@@ -37,19 +37,20 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
   const [launchAtStartup, setLaunchAtStartup] = React.useState(false);
   const [resetBusy, setResetBusy] = React.useState(false);
   const [terminalSidebar, setTerminalSidebar] = useTerminalSidebarVisible();
-  const [backupBusy, setBackupBusy] = React.useState(false);
-  const [restoreModalOpen, setRestoreModalOpen] = React.useState(false);
-  const navigate = useNavigate();
+  const [stateDir, setStateDir] = React.useState<string>("");
 
   const appVersion = pkg.version || "0.0.0";
 
-  // Load the current launch-at-login state on mount.
+  // Load the current launch-at-login state and stateDir on mount.
   React.useEffect(() => {
     const api = getDesktopApiOrNull();
     if (!api?.getLaunchAtLogin) {
       return;
     }
     void api.getLaunchAtLogin().then((res) => setLaunchAtStartup(res.enabled));
+    if (api?.getStateDir) {
+      void api.getStateDir().then((res) => setStateDir(res.stateDir));
+    }
   }, []);
 
   const toggleLaunchAtStartup = React.useCallback(
@@ -70,6 +71,51 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
     },
     [onError]
   );
+
+  const changeStateDir = React.useCallback(async () => {
+    const api = window.openclawDesktop;
+    if (!api?.pickStateDirFolder || !api?.setStateDirOverride) {
+      onError("Desktop API not available");
+      return;
+    }
+    onError(null);
+    const pick = await api.pickStateDirFolder();
+    if (!pick.ok || !pick.path) {return;}
+    const res = await api.setStateDirOverride(pick.path);
+    if (!res.ok) {
+      onError(res.error ?? "Failed to set state directory");
+      return;
+    }
+    setStateDir(pick.path);
+    if (res.needsRestart) {
+      const ok = window.confirm(
+        "The state directory has been changed. The app needs to restart for this to take effect. Restart now?"
+      );
+      if (ok) {
+        void api.retry();
+      }
+    }
+  }, [onError]);
+
+  const resetStateDir = React.useCallback(async () => {
+    const api = window.openclawDesktop;
+    if (!api?.setStateDirOverride) {
+      onError("Desktop API not available");
+      return;
+    }
+    onError(null);
+    const res = await api.setStateDirOverride("");
+    if (!res.ok) {
+      onError(res.error ?? "Failed to reset state directory");
+      return;
+    }
+    const ok = window.confirm(
+      "The state directory override has been cleared. The app needs to restart to use the default. Restart now?"
+    );
+    if (ok) {
+      void api.retry();
+    }
+  }, [onError]);
 
   const resetAndClose = React.useCallback(async () => {
     const api = getDesktopApiOrNull();
@@ -121,7 +167,118 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
   const api = getDesktopApiOrNull();
 
   return (
+<<<<<<< HEAD
     <div className={ps.UiSettingsContentInner}>
+      {/* Folders: OpenClaw data + Agent workspace */}
+      <section className={s.UiSettingsOtherSection}>
+        <h3 className={s.UiSettingsOtherSectionTitle}>Folders</h3>
+        <div className={s.UiSettingsOtherCard}>
+          <div className={s.UiSettingsOtherRow}>
+            <span className={s.UiSettingsOtherRowLabel}>OpenClaw folder</span>
+=======
+    <div className="UiSettingsContentInner UiSettingsOther">
+      <h2 className="UiSettingsOtherTitle">Other</h2>
+
+      <section className="UiSettingsOtherSection">
+        <h3 className="UiSettingsOtherSectionTitle">State Directory</h3>
+        <div className="UiSettingsOtherCard">
+          <div className="UiSettingsOtherRow">
+            <span className="UiSettingsOtherRowLabel UiSettingsOtherRowLabel--mono">
+              {stateDir || "Loading..."}
+            </span>
+          </div>
+          <div className="UiSettingsOtherRow">
+>>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.)
+            <button
+              type="button"
+              className={s.UiSettingsOtherLink}
+              onClick={() => void api?.openOpenclawFolder()}
+            >
+              Open folder
+            </button>
+            <span style={{ display: "flex", gap: "8px" }}>
+              <button
+                type="button"
+                className="UiSettingsOtherLink"
+                onClick={() => void changeStateDir()}
+              >
+                Change
+              </button>
+              <button
+                type="button"
+                className="UiSettingsOtherLink"
+                onClick={() => void resetStateDir()}
+              >
+                Reset to default
+              </button>
+            </span>
+          </div>
+<<<<<<< HEAD
+          <div className={s.UiSettingsOtherRow}>
+            <span className={s.UiSettingsOtherRowLabel}>Agent workspace</span>
+=======
+        </div>
+        <p className="UiSettingsOtherHint">
+          Contains your local OpenClaw state and app data. When an external gateway is running, this
+          automatically points to ~/.openclaw.
+        </p>
+      </section>
+
+      <section className="UiSettingsOtherSection">
+        <h3 className="UiSettingsOtherSectionTitle">Workspace</h3>
+        <div className="UiSettingsOtherCard">
+          <div className="UiSettingsOtherRow">
+            <span className="UiSettingsOtherRowLabel UiSettingsOtherRowLabel--mono">
+              {stateDir ? `${stateDir}/workspace` : "Loading..."}
+            </span>
+          </div>
+          <div className="UiSettingsOtherRow">
+>>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.)
+            <button
+              type="button"
+              className={s.UiSettingsOtherLink}
+              onClick={() => void api?.openWorkspaceFolder()}
+            >
+              Open folder
+            </button>
+          </div>
+        </div>
+        <p className={s.UiSettingsOtherHint}>
+          Contains your local OpenClaw state and app data. Workspace contains editable .md files
+          (AGENTS, SOUL, USER, IDENTITY, TOOLS, HEARTBEAT, BOOTSTRAP) that shape the agent.
+        </p>
+      </section>
+
+      {/* Terminal */}
+      <section className={s.UiSettingsOtherSection}>
+        <h3 className={s.UiSettingsOtherSectionTitle}>Terminal</h3>
+        <div className={s.UiSettingsOtherCard}>
+          <div className={s.UiSettingsOtherRow}>
+            <span className={s.UiSettingsOtherRowLabel}>Show in sidebar</span>
+            <span className={s.UiSettingsOtherAppRowValue}>
+              <label className={s.UiSettingsOtherToggle} aria-label="Show terminal in sidebar">
+                <input
+                  type="checkbox"
+                  checked={terminalSidebar}
+                  onChange={(e) => setTerminalSidebar(e.target.checked)}
+                />
+                <span className={s.UiSettingsOtherToggleTrack}>
+                  <span className={s.UiSettingsOtherToggleThumb} />
+                </span>
+              </label>
+            </span>
+          </div>
+          <div className={s.UiSettingsOtherRow}>
+            <NavLink to={routes.terminal} className={s.UiSettingsOtherLink}>
+              Open Terminal
+            </NavLink>
+          </div>
+        </div>
+        <p className={s.UiSettingsOtherHint}>
+          Built-in terminal with openclaw and bundled tools in PATH.
+        </p>
+      </section>
+
       {/* App & About (combined) */}
       <section className={s.UiSettingsOtherSection}>
         <h3 className={s.UiSettingsOtherSectionTitle}>App</h3>

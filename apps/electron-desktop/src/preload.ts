@@ -96,17 +96,10 @@ type OpenclawDesktopApi = {
   onUpdateDownloadProgress: (cb: (payload: UpdateDownloadProgressPayload) => void) => () => void;
   onUpdateDownloaded: (cb: (payload: UpdateDownloadedPayload) => void) => () => void;
   onUpdateError: (cb: (payload: UpdateErrorPayload) => void) => () => void;
-  // Backup & restore
-  createBackup: () => Promise<{ ok: boolean; cancelled?: boolean; error?: string }>;
-  restoreBackup: (data: string, filename?: string) => Promise<{ ok: boolean; error?: string }>;
-  detectLocalOpenclaw: () => Promise<{ found: boolean; path: string }>;
-  restoreFromDirectory: (dirPath: string) => Promise<{ ok: boolean; error?: string }>;
-  selectOpenclawFolder: () => Promise<{
-    ok: boolean;
-    path?: string;
-    cancelled?: boolean;
-    error?: string;
-  }>;
+  // State directory
+  getStateDir: () => Promise<{ stateDir: string }>;
+  setStateDirOverride: (stateDir: string) => Promise<{ ok: boolean; needsRestart?: boolean; error?: string }>;
+  pickStateDirFolder: () => Promise<{ ok: boolean; path: string }>;
   // Custom skills
   installCustomSkill: (data: string) => Promise<{
     ok: boolean;
@@ -222,6 +215,7 @@ const api: OpenclawDesktopApi = {
   checkForUpdate: async () => ipcRenderer.invoke("updater-check"),
   downloadUpdate: async () => ipcRenderer.invoke("updater-download"),
   installUpdate: async () => ipcRenderer.invoke("updater-install"),
+<<<<<<< HEAD
   onUpdateAvailable: (cb: (payload: UpdateAvailablePayload) => void) =>
     onIpc("updater-available", cb),
   onUpdateDownloadProgress: (cb: (payload: UpdateDownloadProgressPayload) => void) =>
@@ -229,14 +223,41 @@ const api: OpenclawDesktopApi = {
   onUpdateDownloaded: (cb: (payload: UpdateDownloadedPayload) => void) =>
     onIpc("updater-downloaded", cb),
   onUpdateError: (cb: (payload: UpdateErrorPayload) => void) => onIpc("updater-error", cb),
-  // Backup & restore
-  createBackup: async () => ipcRenderer.invoke("backup-create"),
-  restoreBackup: async (data: string, filename?: string) =>
-    ipcRenderer.invoke("backup-restore", { data, filename }),
-  detectLocalOpenclaw: async () => ipcRenderer.invoke("backup-detect-local"),
-  restoreFromDirectory: async (dirPath: string) =>
-    ipcRenderer.invoke("backup-restore-from-dir", { dirPath }),
-  selectOpenclawFolder: async () => ipcRenderer.invoke("backup-select-folder"),
+=======
+  onUpdateAvailable: (cb: (payload: UpdateAvailablePayload) => void) => {
+    const handler = (_evt: unknown, payload: UpdateAvailablePayload) => cb(payload);
+    ipcRenderer.on("updater-available", handler);
+    return () => {
+      ipcRenderer.removeListener("updater-available", handler);
+    };
+  },
+  onUpdateDownloadProgress: (cb: (payload: UpdateDownloadProgressPayload) => void) => {
+    const handler = (_evt: unknown, payload: UpdateDownloadProgressPayload) => cb(payload);
+    ipcRenderer.on("updater-download-progress", handler);
+    return () => {
+      ipcRenderer.removeListener("updater-download-progress", handler);
+    };
+  },
+  onUpdateDownloaded: (cb: (payload: UpdateDownloadedPayload) => void) => {
+    const handler = (_evt: unknown, payload: UpdateDownloadedPayload) => cb(payload);
+    ipcRenderer.on("updater-downloaded", handler);
+    return () => {
+      ipcRenderer.removeListener("updater-downloaded", handler);
+    };
+  },
+  onUpdateError: (cb: (payload: UpdateErrorPayload) => void) => {
+    const handler = (_evt: unknown, payload: UpdateErrorPayload) => cb(payload);
+    ipcRenderer.on("updater-error", handler);
+    return () => {
+      ipcRenderer.removeListener("updater-error", handler);
+    };
+  },
+  // State directory
+  getStateDir: async () => ipcRenderer.invoke("get-state-dir"),
+  setStateDirOverride: async (stateDir: string) =>
+    ipcRenderer.invoke("set-state-dir-override", { stateDir }),
+  pickStateDirFolder: async () => ipcRenderer.invoke("pick-state-dir-folder"),
+>>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.)
   // Custom skills
   installCustomSkill: async (data: string) => ipcRenderer.invoke("install-custom-skill", { data }),
   listCustomSkills: async () => ipcRenderer.invoke("list-custom-skills"),
