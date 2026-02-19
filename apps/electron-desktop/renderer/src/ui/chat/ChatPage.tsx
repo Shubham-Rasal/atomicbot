@@ -22,6 +22,7 @@ import { ScrollToBottomButton } from "./components/ScrollToBottomButton";
 import { useOptimisticSession } from "./hooks/optimisticSessionContext";
 import { useChatStream } from "./hooks/useChatStream";
 import { useVoiceInput, getVoiceProvider } from "./hooks/useVoiceInput";
+import { downloadWhisperModel } from "@store/slices/whisperSlice";
 import { addToastError } from "@shared/toast";
 import ct from "./ChatTranscript.module.css";
 
@@ -294,6 +295,18 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
     navigate("/settings/voice");
   }, [navigate]);
 
+  const whisperDownload = useAppSelector((s) => s.whisper.download);
+
+  const handleWhisperDownload = React.useCallback(() => {
+    void dispatch(downloadWhisperModel("small"));
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (whisperDownload.kind === "idle" && getVoiceProvider() === "local") {
+      setVoiceConfigured(true);
+    }
+  }, [whisperDownload]);
+
   const send = React.useCallback(() => {
     const message = input.trim();
     const hasAttachments = attachments.length > 0;
@@ -350,6 +363,8 @@ export function ChatPage({ state: _state }: { state: Extract<GatewayState, { kin
           onVoiceStop={handleVoiceStop}
           voiceNotConfigured={voiceConfigured === false}
           onNavigateVoiceSettings={handleNavigateVoiceSettings}
+          whisperDownload={whisperDownload}
+          onWhisperDownload={handleWhisperDownload}
         />
       </div>
     </div>

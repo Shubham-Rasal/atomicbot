@@ -1,5 +1,6 @@
 import React from "react";
 import type { ChatAttachmentInput } from "@store/slices/chatSlice";
+import type { DownloadStatus } from "@store/slices/whisperSlice";
 import { ChatAttachmentCard, getFileTypeLabel } from "./ChatAttachmentCard";
 import { MicrophoneIcon, SendIcon } from "@shared/kit/icons";
 import {
@@ -39,6 +40,10 @@ export type ChatComposerProps = {
   /** When true, clicking mic shows a "not configured" tooltip instead of recording. */
   voiceNotConfigured?: boolean;
   onNavigateVoiceSettings?: () => void;
+  /** Whisper model download status from Redux store. */
+  whisperDownload?: DownloadStatus;
+  /** Trigger whisper model download (small). */
+  onWhisperDownload?: () => void;
 };
 
 export const ChatComposer = React.forwardRef<ChatComposerRef, ChatComposerProps>(
@@ -64,6 +69,8 @@ export const ChatComposer = React.forwardRef<ChatComposerRef, ChatComposerProps>
       onVoiceStop,
       voiceNotConfigured = false,
       onNavigateVoiceSettings,
+      whisperDownload,
+      onWhisperDownload,
     },
     ref
   ) {
@@ -71,6 +78,15 @@ export const ChatComposer = React.forwardRef<ChatComposerRef, ChatComposerProps>
     const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
     const [showMicTooltip, setShowMicTooltip] = React.useState(false);
     const micTooltipRef = React.useRef<HTMLDivElement | null>(null);
+    const prevDownloadKindRef = React.useRef(whisperDownload?.kind);
+
+    React.useEffect(() => {
+      const prev = prevDownloadKindRef.current;
+      prevDownloadKindRef.current = whisperDownload?.kind;
+      if (prev === "downloading" && whisperDownload?.kind === "idle") {
+        setShowMicTooltip(false);
+      }
+    }, [whisperDownload?.kind]);
 
     React.useEffect(() => {
       if (!showMicTooltip) return;
@@ -364,17 +380,45 @@ export const ChatComposer = React.forwardRef<ChatComposerRef, ChatComposerProps>
                   </button>
                   {showMicTooltip && (
                     <div className={s.UiChatMicTooltip}>
-                      <div className={s.UiChatMicTooltipText}>Voice is not configured.</div>
-                      <button
-                        type="button"
-                        className={s.UiChatMicTooltipLink}
-                        onClick={() => {
-                          setShowMicTooltip(false);
-                          onNavigateVoiceSettings?.();
-                        }}
-                      >
-                        Settings → Voice
-                      </button>
+                      {whisperDownload?.kind === "downloading" ? (
+                        <>
+                          <div className={s.UiChatMicTooltipText}>
+                            Downloading Whisper model… {whisperDownload.percent}%
+                          </div>
+                          <div className={s.UiChatMicTooltipProgress}>
+                            <div
+                              className={s.UiChatMicTooltipProgressBar}
+                              style={{ width: `${whisperDownload.percent}%` }}
+                            />
+                          </div>
+                        </>
+                      ) : whisperDownload?.kind === "error" ? (
+                        <>
+                          <div className={s.UiChatMicTooltipText}>
+                            Download failed: {whisperDownload.message}
+                          </div>
+                          <button
+                            type="button"
+                            className={s.UiChatMicTooltipLink}
+                            onClick={() => onWhisperDownload?.()}
+                          >
+                            Retry
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className={s.UiChatMicTooltipText}>
+                            To use voice input you need to download Whisper model
+                          </div>
+                          <button
+                            type="button"
+                            className={s.UiChatMicTooltipLink}
+                            onClick={() => onWhisperDownload?.()}
+                          >
+                            Download
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

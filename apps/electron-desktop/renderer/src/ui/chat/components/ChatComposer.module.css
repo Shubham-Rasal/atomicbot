@@ -354,6 +354,22 @@
   opacity: 0.8;
 }
 
+.UiChatMicTooltipProgress {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.UiChatMicTooltipProgressBar {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--lime);
+  transition: width 0.3s ease;
+}
+
 .UiChatMicButton {
   flex-shrink: 0;
   width: 32px;
