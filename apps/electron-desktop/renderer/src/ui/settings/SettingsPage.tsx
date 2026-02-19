@@ -11,6 +11,7 @@ import { ConnectorsTab } from "./connectors/ConnectorsTab";
 import { ModelProvidersTab } from "./providers/ModelProvidersTab";
 import { OtherTab } from "./OtherTab";
 import { SkillsIntegrationsTab } from "./skills/SkillsIntegrationsTab";
+import { AgentsTab } from "./AgentsTab";
 import { VoiceRecognitionTab } from "./voice/VoiceRecognitionTab";
 import { addToastError } from "@shared/toast";
 

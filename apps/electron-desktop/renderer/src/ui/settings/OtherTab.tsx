@@ -167,7 +167,6 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
   const api = getDesktopApiOrNull();
 
   return (
-<<<<<<< HEAD
     <div className={ps.UiSettingsContentInner}>
       {/* Folders: OpenClaw data + Agent workspace */}
       <section className={s.UiSettingsOtherSection}>
@@ -175,20 +174,6 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
         <div className={s.UiSettingsOtherCard}>
           <div className={s.UiSettingsOtherRow}>
             <span className={s.UiSettingsOtherRowLabel}>OpenClaw folder</span>
-=======
-    <div className="UiSettingsContentInner UiSettingsOther">
-      <h2 className="UiSettingsOtherTitle">Other</h2>
-
-      <section className="UiSettingsOtherSection">
-        <h3 className="UiSettingsOtherSectionTitle">State Directory</h3>
-        <div className="UiSettingsOtherCard">
-          <div className="UiSettingsOtherRow">
-            <span className="UiSettingsOtherRowLabel UiSettingsOtherRowLabel--mono">
-              {stateDir || "Loading..."}
-            </span>
-          </div>
-          <div className="UiSettingsOtherRow">
->>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.)
             <button
               type="button"
               className={s.UiSettingsOtherLink}
@@ -213,27 +198,8 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
               </button>
             </span>
           </div>
-<<<<<<< HEAD
           <div className={s.UiSettingsOtherRow}>
             <span className={s.UiSettingsOtherRowLabel}>Agent workspace</span>
-=======
-        </div>
-        <p className="UiSettingsOtherHint">
-          Contains your local OpenClaw state and app data. When an external gateway is running, this
-          automatically points to ~/.openclaw.
-        </p>
-      </section>
-
-      <section className="UiSettingsOtherSection">
-        <h3 className="UiSettingsOtherSectionTitle">Workspace</h3>
-        <div className="UiSettingsOtherCard">
-          <div className="UiSettingsOtherRow">
-            <span className="UiSettingsOtherRowLabel UiSettingsOtherRowLabel--mono">
-              {stateDir ? `${stateDir}/workspace` : "Loading..."}
-            </span>
-          </div>
-          <div className="UiSettingsOtherRow">
->>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.)
             <button
               type="button"
               className={s.UiSettingsOtherLink}

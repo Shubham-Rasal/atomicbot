@@ -13,6 +13,7 @@ export type RegisterParams = {
   startGateway: (opts?: { silent?: boolean }) => Promise<void>;
   userData: string;
   stateDir: string;
+  stateDirOverridePath: string;
   logsDir: string;
   openclawDir: string;
   gogBin: string;

@@ -1,7 +1,7 @@
 import React from "react";
 
-import { ActionButton, InlineError, TextInput } from "../../kit";
-import type { ConfigSnapshot, GatewayRpcLike } from "../../onboarding/welcome/types";
+import { ActionButton, InlineError, TextInput } from "@shared/kit";
+import type { ConfigSnapshot, GatewayRpcLike } from "@ui/onboarding/hooks/types";
 
 /** Safely extract an error message string from an unknown thrown value. */
 function errorMessage(err: unknown): string {

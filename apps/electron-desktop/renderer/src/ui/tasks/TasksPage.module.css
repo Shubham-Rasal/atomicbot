@@ -1,0 +1,522 @@
+/* Tasks page: cron/scheduled jobs management */
+
+.UiTasksPage {
+  width: 100%;
+  max-width: 680px;
+  min-width: 568px;
+  height: 100vh;
+  overflow: auto;
+}
+
+.UiTasksHeader {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-base);
+  padding-top: 48px;
+  padding-bottom: 16px;
+  z-index: 100;
+}
+
+.UiTasksTitle {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 32px;
+  letter-spacing: -0.26px;
+  margin: 0;
+}
+
+.UiTasksBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.UiTasksStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.UiTasksStatusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.UiTasksStatusDot--enabled {
+  background: #30d158;
+  box-shadow: 0 0 6px rgba(48, 209, 88, 0.4);
+}
+
+.UiTasksStatusDot--disabled {
+  background: #636366;
+}
+
+/* Empty state */
+.UiTasksEmpty {
+  text-align: center;
+  padding: 64px 16px;
+  color: rgba(235, 235, 245, 0.4);
+  font-size: 14px;
+}
+
+/* Job card */
+.UiTaskCard {
+  border-radius: 12px;
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 12px;
+}
+
+.UiTaskCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.UiTaskCardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.UiTaskCardName {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.UiTaskCardHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Status badge */
+.UiTaskStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.UiTaskStatusBadge--ok {
+  background: rgba(48, 209, 88, 0.12);
+  color: #30d158;
+}
+
+.UiTaskStatusBadge--error {
+  background: rgba(255, 69, 58, 0.12);
+  color: #ff453a;
+}
+
+.UiTaskStatusBadge--running {
+  background: rgba(10, 132, 255, 0.12);
+  color: #0a84ff;
+}
+
+.UiTaskStatusBadge--skipped {
+  background: rgba(255, 159, 10, 0.12);
+  color: #ff9f0a;
+}
+
+.UiTaskStatusBadge--disabled {
+  background: rgba(142, 142, 147, 0.1);
+  color: #636366;
+}
+
+/* Toggle switch */
+.UiTaskToggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.UiTaskToggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.UiTaskToggleTrack {
+  border-radius: var(--radius-xl);
+  background: #39393d;
+  position: relative;
+  flex-shrink: 0;
+  transition: background var(--transition-base);
+  height: 24px;
+  width: 40px;
+}
+
+.UiTaskToggleThumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  left: 2px;
+  top: 2px;
+  transition: transform var(--transition-base);
+  pointer-events: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.UiTaskToggle input:checked + .UiTaskToggleTrack {
+  background: #0a84ff;
+}
+
+.UiTaskToggle input:checked + .UiTaskToggleTrack .UiTaskToggleThumb {
+  transform: translateX(16px);
+}
+
+.UiTaskToggle input:focus-visible + .UiTaskToggleTrack {
+  outline: 2px solid rgba(10, 132, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.UiTaskToggle:hover {
+  opacity: 0.85;
+}
+
+/* Detail section */
+.UiTaskDetails {
+  padding: 0 16px 2px;
+}
+
+.UiTaskDetailRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 7px 0;
+  font-size: 13px;
+  line-height: 18px;
+  gap: 16px;
+}
+
+.UiTaskDetailRow + .UiTaskDetailRow {
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.UiTaskDetailLabel {
+  color: rgba(235, 235, 245, 0.45);
+  font-weight: 500;
+  flex-shrink: 0;
+  min-width: 72px;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.UiTaskDetailValue {
+  color: rgba(235, 235, 245, 0.85);
+  font-weight: 400;
+  text-align: right;
+  word-break: break-word;
+  min-width: 0;
+}
+
+.UiTaskDetailValue code {
+  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Message preview — left-aligned, truncated */
+.UiTaskMessage {
+  padding: 0 16px 12px;
+}
+
+.UiTaskMessageText {
+  font-size: 12px;
+  line-height: 17px;
+  color: rgba(235, 235, 245, 0.5);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  word-break: break-word;
+  max-height: 68px;
+  overflow: hidden;
+  position: relative;
+  cursor: default;
+}
+
+.UiTaskMessageText--expanded {
+  max-height: none;
+}
+
+.UiTaskMessageToggle {
+  appearance: none;
+  border: none;
+  background: none;
+  color: #0a84ff;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 12px 0;
+  display: block;
+}
+
+.UiTaskMessageToggle:hover {
+  opacity: 0.8;
+}
+
+/* Actions row */
+.UiTaskActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.UiTaskActionBtn {
+  appearance: none;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(235, 235, 245, 0.55);
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.UiTaskActionBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(235, 235, 245, 0.85);
+}
+
+.UiTaskActionBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.UiTaskActionBtn--primary {
+  color: #0a84ff;
+}
+
+.UiTaskActionBtn--primary:hover:not(:disabled) {
+  background: rgba(10, 132, 255, 0.1);
+  color: #0a84ff;
+}
+
+.UiTaskActionBtn--danger {
+  color: rgba(255, 69, 58, 0.7);
+}
+
+.UiTaskActionBtn--danger:hover:not(:disabled) {
+  background: rgba(255, 69, 58, 0.08);
+  color: #ff453a;
+}
+
+.UiTaskActionSpacer {
+  flex: 1;
+}
+
+/* Inline edit form */
+.UiTaskEditForm {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.UiTaskEditField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.UiTaskEditField label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(235, 235, 245, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.UiTaskEditField input,
+.UiTaskEditField select,
+.UiTaskEditField textarea {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #f2f2f7;
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color var(--transition-base);
+}
+
+.UiTaskEditField input:focus,
+.UiTaskEditField select:focus,
+.UiTaskEditField textarea:focus {
+  border-color: rgba(10, 132, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.UiTaskEditField textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.UiTaskEditActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.UiTaskEditActions button {
+  appearance: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 18px;
+  cursor: pointer;
+  transition: opacity var(--transition-base);
+}
+
+.UiTaskEditActions button:hover {
+  opacity: 0.85;
+}
+
+.UiTaskEditSave {
+  background: #0a84ff;
+  color: #fff;
+}
+
+.UiTaskEditCancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(235, 235, 245, 0.8);
+}
+
+/* Delete confirmation */
+.UiTaskDeleteConfirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(235, 235, 245, 0.5);
+}
+
+.UiTaskDeleteConfirm button {
+  appearance: none;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.UiTaskDeleteYes {
+  color: #ff453a;
+}
+
+.UiTaskDeleteYes:hover {
+  background: rgba(255, 69, 58, 0.1);
+}
+
+.UiTaskDeleteNo {
+  color: #0a84ff;
+}
+
+.UiTaskDeleteNo:hover {
+  background: rgba(10, 132, 255, 0.1);
+}
+
+/* Loading state */
+.UiTasksLoading {
+  text-align: center;
+  padding: 64px 16px;
+  color: rgba(235, 235, 245, 0.4);
+  font-size: 14px;
+}
+
+/* Inline select (delivery dropdown in detail row) */
+.UiTaskInlineSelect {
+  appearance: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: rgba(235, 235, 245, 0.85);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 3px 24px 3px 8px;
+  outline: none;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-base),
+    background var(--transition-base);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  background-size: 10px 6px;
+  min-width: 0;
+  max-width: 200px;
+}
+
+.UiTaskInlineSelect:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.UiTaskInlineSelect:focus {
+  border-color: rgba(10, 132, 255, 0.5);
+}
+
+.UiTaskInlineSelect option,
+.UiTaskInlineSelect optgroup {
+  background: #2c2c2e;
+  color: #f2f2f7;
+}

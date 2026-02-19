@@ -200,11 +200,7 @@ export function useSkillsStatus(props: {
     let cancelled = false;
     (async () => {
       try {
-<<<<<<< HEAD:apps/electron-desktop/renderer/src/ui/settings/skills/useSkillsStatus.ts
         const api = getDesktopApiOrNull();
-=======
-        const api = window.openclawDesktop;
->>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.):apps/electron-desktop/renderer/src/ui/settings/useSkillsStatus.ts
         if (!api) {return;}
         const res = await api.gogAuthList();
         if (cancelled) {

@@ -220,14 +220,9 @@ export function isApprovalContinueMessage(role: string, text: string): boolean {
 export function isHeartbeatMessage(role: string, text: string): boolean {
   const trimmed = text.trim();
   if (!trimmed) {return false;}
-<<<<<<< HEAD
   // User-side: the heartbeat prompt injected by the gateway.
   // Use includes() because gateway may prepend metadata (date headers, etc.).
   if (role === "user" && trimmed.includes(HEARTBEAT_PROMPT_PREFIX)) {
-=======
-  // User-side: the heartbeat prompt injected by the gateway
-  if (role === "user" && trimmed.startsWith(HEARTBEAT_PROMPT_PREFIX)) {
->>>>>>> 7207ec5 (Implement state directory management in Electron app, allowing user overrides and selection of custom directories. Enhance chat functionality to support message attachments and update UI for generated images. Add Nano Banana skill integration with appropriate modals and status handling.)
     return true;
   }
   // Assistant-side: HEARTBEAT_OK acknowledgment (possibly with light markup or surrounding text)

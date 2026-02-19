@@ -50,6 +50,10 @@ const EXPECTED_CHANNELS = [
   "launch-at-login-get",
   "launch-at-login-set",
   "get-app-version",
+  // state directory
+  "get-state-dir",
+  "set-state-dir-override",
+  "pick-state-dir-folder",
   // updater
   "fetch-release-notes",
   "updater-check",
@@ -95,6 +99,7 @@ describe("IPC channel contracts", () => {
       startGateway: vi.fn(async () => {}),
       userData: "/tmp/user",
       stateDir: "/tmp/state",
+      stateDirOverridePath: "/tmp/user/state-dir-override.json",
       logsDir: "/tmp/logs",
       openclawDir: "/tmp/openclaw",
       gogBin: "/bin/gog",
@@ -127,6 +132,7 @@ describe("IPC channel contracts", () => {
       startGateway: vi.fn(async () => {}),
       userData: "/tmp/user",
       stateDir: "/tmp/state",
+      stateDirOverridePath: "/tmp/user/state-dir-override.json",
       logsDir: "/tmp/logs",
       openclawDir: "/tmp/openclaw",
       gogBin: "/bin/gog",
