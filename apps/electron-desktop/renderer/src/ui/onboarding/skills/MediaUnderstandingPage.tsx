@@ -29,7 +29,7 @@ export function MediaUnderstandingPage(props: {
   onBack: () => void;
   onSkip: () => void;
 }) {
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 3;
   const [settings, setSettings] = React.useState<MediaUnderstandingSettings>({
     image: true,

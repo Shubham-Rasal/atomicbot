@@ -34,6 +34,7 @@ export function getConfiguredProviders(cfg: ConfigData | undefined): Set<ModelPr
       normalized === "anthropic" ||
       normalized === "openrouter" ||
       normalized === "google" ||
+      normalized === "nvidia" ||
       normalized === "openai" ||
       normalized === "openai-codex" ||
       normalized === "xai" ||

@@ -1,6 +1,7 @@
 export type ModelProvider =
   | "anthropic"
   | "google"
+  | "nvidia"
   | "openai"
   | "openai-codex"
   | "openrouter"
@@ -31,6 +32,7 @@ export const PROVIDER_ICONS: Record<ModelProvider, string> = {
   openai: "openai.svg",
   "openai-codex": "openai-codex.svg",
   google: "gemini.svg",
+  nvidia: "nvidia.svg",
   minimax: "minimax.svg",
   xai: "xai.svg",
   zai: "zai.svg",
@@ -74,6 +76,15 @@ export const MODEL_PROVIDERS: ModelProviderInfo[] = [
     placeholder: "sk-or-...",
     helpUrl: "https://openrouter.ai/keys",
     helpText: "Get your API key from OpenRouter.",
+  },
+  {
+    id: "nvidia",
+    name: "NVIDIA NIM",
+    description: "Access DeepSeek, Kimi, etc. via NVIDIA's free API",
+    popular: true,
+    placeholder: "nvapi-...",
+    helpUrl: "https://build.nvidia.com/explore/discover",
+    helpText: "Get your free API key from NVIDIA Build.",
   },
   {
     id: "google",
@@ -139,6 +150,7 @@ export const MODEL_PROVIDER_BY_ID: Record<ModelProvider, ModelProviderInfo> = {
   anthropic: MODEL_PROVIDERS.find((p) => p.id === "anthropic")!,
   openrouter: MODEL_PROVIDERS.find((p) => p.id === "openrouter")!,
   google: MODEL_PROVIDERS.find((p) => p.id === "google")!,
+  nvidia: MODEL_PROVIDERS.find((p) => p.id === "nvidia")!,
   openai: MODEL_PROVIDERS.find((p) => p.id === "openai")!,
   "openai-codex": MODEL_PROVIDERS.find((p) => p.id === "openai-codex")!,
   xai: MODEL_PROVIDERS.find((p) => p.id === "xai")!,

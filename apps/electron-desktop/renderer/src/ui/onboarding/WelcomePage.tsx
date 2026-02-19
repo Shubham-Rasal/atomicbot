@@ -21,7 +21,6 @@ import { SlackConnectPage } from "./connections/SlackConnectPage";
 import { TrelloConnectPage } from "./connections/TrelloConnectPage";
 import { TelegramTokenPage } from "./connections/TelegramTokenPage";
 import { TelegramUserPage } from "./connections/TelegramUserPage";
-import { VoiceProviderPage } from "./providers/VoiceProviderPage";
 import { WebSearchPage } from "./skills/WebSearchPage";
 import { RestoreOptionPage } from "./RestoreOptionPage";
 import { RestoreFilePage } from "./RestoreFilePage";
@@ -186,18 +185,6 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
       />
 
       <Route
-        path="voice-provider"
-        element={
-          <VoiceProviderPage
-            hasOpenAiProvider={welcome.hasOpenAiProvider}
-            onBack={welcome.goSkills}
-            onSkip={welcome.goConnections}
-            onContinue={welcome.goConnections}
-          />
-        }
-      />
-
-      <Route
         path="skills"
         element={
           <SkillsSetupPage
@@ -222,8 +209,8 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
             slackStatus={welcome.skills.slack}
             onSlackConnect={welcome.goSlackFromSkills}
             onBack={welcome.goModelSelect}
-            onSkip={welcome.goVoiceProvider}
-            onContinue={welcome.goVoiceProvider}
+            onSkip={welcome.goConnections}
+            onContinue={welcome.goConnections}
           />
         }
       />
@@ -236,7 +223,7 @@ export function WelcomePage({ state }: { state: Extract<GatewayState, { kind: "r
             onTelegramConnect={welcome.goTelegramToken}
             slackStatus={welcome.skills.slack}
             onSlackConnect={welcome.goSlackFromConnections}
-            onBack={welcome.goVoiceProvider}
+            onBack={welcome.goSkills}
             onSkip={welcome.finish}
             onContinue={welcome.finish}
           />

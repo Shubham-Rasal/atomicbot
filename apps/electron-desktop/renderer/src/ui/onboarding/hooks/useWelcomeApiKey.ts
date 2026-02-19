@@ -1,5 +1,6 @@
 import React from "react";
 import { getDesktopApiOrNull } from "@ipc/desktopApi";
+import { setVoiceProvider } from "../../chat/hooks/useVoiceInput";
 import type { Provider } from "../providers/ProviderSelectPage";
 import type { ConfigSnapshot, GatewayRpcLike } from "./types";
 
@@ -106,6 +107,7 @@ export function useWelcomeApiKey({
       // Save an additional provider key without re-running model selection flow.
       const ok = await saveApiKey(provider, apiKey);
       if (ok) {
+        setVoiceProvider("openai");
         await loadModels?.();
         await refreshProviderFlags?.();
       }

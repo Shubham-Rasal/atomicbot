@@ -17,7 +17,7 @@ export function OAuthProviderPage(props: {
   const [progressMsg, setProgressMsg] = useState<string | null>(null);
   const abortRef = useRef(false);
 
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 1;
 
   const startOAuth = useCallback(async () => {

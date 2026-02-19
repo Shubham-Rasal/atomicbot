@@ -6,6 +6,8 @@ import { dataUrlToBase64, type ChatAttachmentInput } from "@store/slices/chatSli
 import { getObject } from "@shared/utils/configHelpers";
 import { ChatComposer, type ChatComposerRef } from "./components/ChatComposer";
 import { useVoiceInput, getVoiceProvider } from "./hooks/useVoiceInput";
+import { useAppDispatch, useAppSelector } from "@store/hooks";
+import { downloadWhisperModel } from "@store/slices/whisperSlice";
 import { addToastError } from "@shared/toast";
 import { routes } from "../app/routes";
 import ct from "./ChatTranscript.module.css";
@@ -22,6 +24,7 @@ export function StartChatPage({
   const navigate = useNavigate();
   const location = useLocation();
   const gw = useGatewayRpc();
+  const dispatch = useAppDispatch();
   const composerRef = React.useRef<ChatComposerRef | null>(null);
   const [input, setInput] = React.useState("");
   const [attachments, setAttachments] = React.useState<ChatAttachmentInput[]>([]);
@@ -100,6 +103,18 @@ export function StartChatPage({
   const handleNavigateVoiceSettings = React.useCallback(() => {
     navigate("/settings/voice");
   }, [navigate]);
+
+  const whisperDownload = useAppSelector((s) => s.whisper.download);
+
+  const handleWhisperDownload = React.useCallback(() => {
+    void dispatch(downloadWhisperModel("small"));
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (whisperDownload.kind === "idle" && getVoiceProvider() === "local") {
+      setVoiceConfigured(true);
+    }
+  }, [whisperDownload]);
 
   const logoUrl = React.useMemo(() => {
     return new URL("../../assets/main-logo.png", document.baseURI).toString();
@@ -193,6 +208,8 @@ export function StartChatPage({
           onVoiceStop={handleVoiceStop}
           voiceNotConfigured={voiceConfigured === false}
           onNavigateVoiceSettings={handleNavigateVoiceSettings}
+          whisperDownload={whisperDownload}
+          onWhisperDownload={handleWhisperDownload}
         />
       </div>
     </div>

@@ -177,7 +177,13 @@ export function useVoiceInput(gwRequest: GatewayRequest): UseVoiceInputResult {
           });
           resolve(result.text?.trim() || null);
         } catch (err) {
-          setError(`Transcription failed: ${err instanceof Error ? err.message : String(err)}`);
+          const msg =
+            err instanceof Error
+              ? err.message
+              : typeof err === "object" && err !== null && "message" in err
+                ? String((err as Record<string, unknown>).message)
+                : String(err);
+          setError(`Transcription failed: ${msg}`);
           resolve(null);
         } finally {
           setIsProcessing(false);

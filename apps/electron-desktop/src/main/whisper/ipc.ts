@@ -386,7 +386,8 @@ export function registerWhisperIpcHandlers(params: {
             }
 
             try {
-              const txt = fs.readFileSync(outputTxtPath, "utf-8").trim();
+              const raw = fs.readFileSync(outputTxtPath, "utf-8").trim();
+              const txt = /^\[BLANK_AUDIO\]$/i.test(raw) ? "" : raw;
               resolve({ text: txt, stdout: stdoutBuf, stderr: stderrBuf });
             } catch (readErr) {
               reject(new Error(`Failed to read whisper output: ${String(readErr)}`));

@@ -216,7 +216,7 @@ export function SkillsSetupPage(props: {
   onSkip: () => void;
   onContinue: () => void;
 }) {
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 3;
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Skills setup">

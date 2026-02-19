@@ -11,7 +11,7 @@ export function GitHubConnectPage(props: {
 }) {
   const [pat, setPat] = React.useState("");
   const [errorText, setErrorText] = React.useState("");
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 3;
 
   const handleSubmit = () => {

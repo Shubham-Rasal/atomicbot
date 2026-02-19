@@ -55,10 +55,7 @@ export async function transcribeOpenAiCompatibleAudio(
     await assertOkOrThrowHttpError(res, "Audio transcription failed");
 
     const payload = (await res.json()) as { text?: string };
-    const text = payload.text?.trim();
-    if (!text) {
-      throw new Error("Audio transcription response missing text");
-    }
+    const text = payload.text?.trim() ?? "";
     return { text, model };
   } finally {
     await release();

@@ -7,6 +7,7 @@ import type { GatewayState } from "@main/types";
 import { routes } from "../../app/routes";
 import type { Provider } from "../providers/ProviderSelectPage";
 import { MODEL_PROVIDER_BY_ID } from "@shared/models/providers";
+import { setVoiceProvider } from "../../chat/hooks/useVoiceInput";
 import { useWelcomeApiKey } from "./useWelcomeApiKey";
 import { useWelcomeAppleNotes } from "./useWelcomeAppleNotes";
 import { useWelcomeAppleReminders } from "./useWelcomeAppleReminders";
@@ -201,6 +202,9 @@ export function useWelcomeState({ state, navigate }: WelcomeStateInput) {
       try {
         const ok = await saveApiKey(selectedProvider, apiKey);
         if (ok) {
+          if (selectedProvider === "openai") {
+            setVoiceProvider("openai");
+          }
           await loadModels();
           nav.goModelSelect();
         }

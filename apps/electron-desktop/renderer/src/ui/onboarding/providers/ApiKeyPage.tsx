@@ -41,7 +41,7 @@ export function ApiKeyPage(props: {
   const [apiKey, setApiKey] = React.useState("");
   const [setupToken, setSetupToken] = React.useState("");
   const meta = MODEL_PROVIDER_BY_ID[props.provider];
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 1;
   const [errorText, setErrorText] = useState("");
   const [validating, setValidating] = useState(false);

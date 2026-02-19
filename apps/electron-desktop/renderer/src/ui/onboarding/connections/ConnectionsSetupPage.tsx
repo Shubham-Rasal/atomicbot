@@ -70,8 +70,8 @@ export function ConnectionsSetupPage(props: {
   onSkip: () => void;
   onContinue: () => void;
 }) {
-  const totalSteps = 6;
-  const activeStep = 5;
+  const totalSteps = 5;
+  const activeStep = 4;
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Connections setup">
       <GlassCard className="UiSkillsCard UiGlassCardOnboarding">

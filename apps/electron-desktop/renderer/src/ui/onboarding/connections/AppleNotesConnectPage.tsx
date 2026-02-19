@@ -9,7 +9,7 @@ export function AppleNotesConnectPage(props: {
   onCheckAndEnable: () => void;
   onBack: () => void;
 }) {
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 3;
 
   return (
