@@ -11,8 +11,8 @@ export function TelegramTokenPage(props: {
   onNext: () => void;
   onSkip: () => void;
 }) {
-  const totalSteps = 6;
-  const activeStep = 5;
+  const totalSteps = 5;
+  const activeStep = 4;
   const [errorText, setErrorText] = React.useState("");
   const token = props.telegramToken.trim();
 

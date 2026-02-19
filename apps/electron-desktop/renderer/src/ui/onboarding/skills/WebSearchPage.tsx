@@ -45,7 +45,7 @@ export function WebSearchPage(props: {
   const [apiKey, setApiKey] = React.useState("");
   const meta = PROVIDERS.find((p) => p.id === provider) ?? PROVIDERS[0];
   const [errorText, setErrorText] = React.useState("");
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 3;
 
   const handleSubmit = () => {

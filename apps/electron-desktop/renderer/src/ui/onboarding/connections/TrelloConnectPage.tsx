@@ -12,7 +12,7 @@ export function TrelloConnectPage(props: {
 }) {
   const [apiKey, setApiKey] = React.useState("");
   const [token, setToken] = React.useState("");
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 3;
   const [errors, setErrors] = React.useState<{
     apiKey?: string;

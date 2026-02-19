@@ -19,7 +19,7 @@ export function ModelSelectPage(props: {
   onRetry: () => void;
 }) {
   const [selected, setSelected] = React.useState<string | null>(null);
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 2;
 
   // Filter and sort models by provider and tier

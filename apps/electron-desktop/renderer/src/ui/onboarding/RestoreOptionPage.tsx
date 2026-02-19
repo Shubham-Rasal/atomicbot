@@ -80,7 +80,7 @@ export function RestoreOptionPage() {
     }
   }, [selected, navigate]);
 
-  const totalSteps = 6;
+  const totalSteps = 5;
   const activeStep = 0;
 
   return (
