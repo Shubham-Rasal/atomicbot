@@ -110,8 +110,8 @@ export function RestoreFilePage() {
     void navigate(`${routes.welcome}/restore`);
   }, [navigate]);
 
-  const totalSteps = 6;
-  const activeStep = 0;
+  const totalSteps = 2;
+  const activeStep = 1;
 
   return (
     <HeroPageLayout variant="compact" align="center" aria-label="Restore from backup file">
@@ -126,9 +126,9 @@ export function RestoreFilePage() {
           ))}
         </div>
 
-        <div className="UiSectionTitle">Restore from backup</div>
+        <div className="UiSectionTitle">Upload backup file</div>
         <div className="UiSectionSubtitle">
-          Upload a backup archive to restore your OpenClaw configuration
+          Choose how you want to set up your OpenClaw. You can change configuration later.
         </div>
 
         {/* Hidden file input */}
@@ -155,7 +155,7 @@ export function RestoreFilePage() {
             </>
           ) : (
             <>
-              <div className={s.UiRestoreDropZoneTitle}>Drag backup archive here</div>
+              <div className={s.UiRestoreDropZoneTitle}>Drag ZIP folder here</div>
               <div className={s.UiRestoreDropZoneSubtext}>
                 Or{" "}
                 <button

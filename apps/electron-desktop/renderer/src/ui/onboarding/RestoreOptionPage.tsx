@@ -80,7 +80,7 @@ export function RestoreOptionPage() {
     }
   }, [selected, navigate]);
 
-  const totalSteps = 6;
+  const totalSteps = 2;
   const activeStep = 0;
 
   return (
@@ -101,9 +101,9 @@ export function RestoreOptionPage() {
           Import an existing setup and continue where you left off
         </div>
 
-        <div className={s.UiRestoreOptions}>
+        <div className="UiProviderList UiListWithScroll scrollable">
           <label
-            className={`${s.UiRestoreOptionCard} ${selected === "local" ? s["UiRestoreOptionCard--selected"] : ""}`}
+            className={`UiProviderOption ${selected === "local" ? "UiProviderOption--selected" : ""}`}
           >
             <input
               type="radio"
@@ -111,27 +111,23 @@ export function RestoreOptionPage() {
               value="local"
               checked={selected === "local"}
               onChange={() => setSelected("local")}
-              className={s.UiRestoreRadio}
+              className="UiProviderRadio"
             />
             <span className={s.UiRestoreOptionIcon} aria-hidden="true">
               <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 28 28"
+                fill="none"
               >
-                <rect
-                  x="2"
-                  y="3"
-                  width="20"
-                  height="14"
-                  rx="2"
+                <path
+                  d="M24.4997 18.667V8.40033C24.4997 7.09354 24.4997 6.44014 24.2454 5.94101C24.0217 5.50197 23.6647 5.14501 23.2257 4.92131C22.7265 4.66699 22.0731 4.66699 20.7663 4.66699H7.23301C5.92622 4.66699 5.27282 4.66699 4.7737 4.92131C4.33465 5.14501 3.9777 5.50197 3.75399 5.94101C3.49967 6.44014 3.49967 7.09354 3.49967 8.40033V18.667M5.44412 23.3337H22.5552C23.2785 23.3337 23.6402 23.3337 23.9369 23.2542C24.7421 23.0384 25.3711 22.4095 25.5868 21.6042C25.6663 21.3075 25.6663 20.9459 25.6663 20.2225C25.6663 19.8609 25.6663 19.6801 25.6266 19.5317C25.5187 19.1291 25.2042 18.8146 24.8016 18.7067C24.6533 18.667 24.4724 18.667 24.1108 18.667H3.88856C3.52691 18.667 3.34608 18.667 3.19772 18.7067C2.79511 18.8146 2.48064 19.1291 2.37276 19.5317C2.33301 19.6801 2.33301 19.8609 2.33301 20.2225C2.33301 20.9459 2.33301 21.3075 2.41251 21.6042C2.62827 22.4095 3.25722 23.0384 4.06243 23.2542C4.35915 23.3337 4.72081 23.3337 5.44412 23.3337Z"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  stroke-width="2.33333"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
                 />
-                <path d="M8 21h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M12 17v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </span>
             <div className={s.UiRestoreOptionText}>
@@ -143,7 +139,7 @@ export function RestoreOptionPage() {
           </label>
 
           <label
-            className={`${s.UiRestoreOptionCard} ${selected === "file" ? s["UiRestoreOptionCard--selected"] : ""}`}
+            className={`UiProviderOption ${selected === "file" ? "UiProviderOption--selected" : ""}`}
           >
             <input
               type="radio"
@@ -151,27 +147,23 @@ export function RestoreOptionPage() {
               value="file"
               checked={selected === "file"}
               onChange={() => setSelected("file")}
-              className={s.UiRestoreRadio}
+              className="UiProviderRadio"
             />
             <span className={s.UiRestoreOptionIcon} aria-hidden="true">
               <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 28 28"
+                fill="none"
               >
-                <rect
-                  x="3"
-                  y="3"
-                  width="18"
-                  height="18"
-                  rx="2"
+                <path
+                  d="M15.1663 8.16667L13.8649 5.56374C13.4903 4.8146 13.303 4.44002 13.0236 4.16636C12.7765 3.92435 12.4787 3.7403 12.1518 3.62753C11.782 3.5 11.3632 3.5 10.5257 3.5H6.06634C4.75955 3.5 4.10616 3.5 3.60703 3.75432C3.16799 3.97802 2.81103 4.33498 2.58733 4.77402C2.33301 5.27315 2.33301 5.92654 2.33301 7.23333V8.16667M2.33301 8.16667H20.0663C22.0265 8.16667 23.0066 8.16667 23.7553 8.54814C24.4139 8.8837 24.9493 9.41913 25.2849 10.0777C25.6663 10.8264 25.6663 11.8065 25.6663 13.7667V18.9C25.6663 20.8602 25.6663 21.8403 25.2849 22.589C24.9493 23.2475 24.4139 23.783 23.7553 24.1185C23.0066 24.5 22.0265 24.5 20.0663 24.5H7.93301C5.97282 24.5 4.99273 24.5 4.24404 24.1185C3.58547 23.783 3.05004 23.2475 2.71449 22.589C2.33301 21.8403 2.33301 20.8602 2.33301 18.9V8.16667ZM13.9997 19.8333V12.8333M10.4997 16.3333H17.4997"
                   stroke="currentColor"
-                  strokeWidth="1.5"
+                  stroke-width="2.33333"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
                 />
-                <path d="M12 8v8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <path d="M8 12h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </span>
             <div className={s.UiRestoreOptionText}>
@@ -207,7 +199,7 @@ export function RestoreOptionPage() {
             disabled={pageState === "loading"}
             loading={pageState === "loading"}
           >
-            Continue
+            Restore now
           </PrimaryButton>
         </div>
       </GlassCard>

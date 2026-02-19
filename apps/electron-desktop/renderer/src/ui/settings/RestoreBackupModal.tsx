@@ -145,7 +145,7 @@ export function RestoreBackupModal(props: {
           </>
         ) : (
           <>
-            <div className={s.UiRestoreDropZoneTitle}>Drag backup archive here</div>
+            <div className={s.UiRestoreDropZoneTitle}>Drag ZIP folder here</div>
             <div className={s.UiRestoreDropZoneSubtext}>
               Or{" "}
               <button type="button" className={s.UiRestoreChooseFileLink} onClick={openFilePicker}>
