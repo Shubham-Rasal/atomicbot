@@ -122,105 +122,6 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
 
   return (
     <div className={ps.UiSettingsContentInner}>
-      {/* Folders: OpenClaw data + Agent workspace */}
-      <section className={s.UiSettingsOtherSection}>
-        <h3 className={s.UiSettingsOtherSectionTitle}>Folders</h3>
-        <div className={s.UiSettingsOtherCard}>
-          <div className={s.UiSettingsOtherRow}>
-            <span className={s.UiSettingsOtherRowLabel}>OpenClaw folder</span>
-            <button
-              type="button"
-              className={s.UiSettingsOtherLink}
-              onClick={() => void api?.openOpenclawFolder()}
-            >
-              Open folder
-            </button>
-          </div>
-          <div className={s.UiSettingsOtherRow}>
-            <span className={s.UiSettingsOtherRowLabel}>Agent workspace</span>
-            <button
-              type="button"
-              className={s.UiSettingsOtherLink}
-              onClick={() => void api?.openWorkspaceFolder()}
-            >
-              Open folder
-            </button>
-          </div>
-        </div>
-        <p className={s.UiSettingsOtherHint}>
-          Contains your local OpenClaw state and app data. Workspace contains editable .md files
-          (AGENTS, SOUL, USER, IDENTITY, TOOLS, HEARTBEAT, BOOTSTRAP) that shape the agent.
-        </p>
-      </section>
-
-      {/* Backup */}
-      <section className={s.UiSettingsOtherSection}>
-        <h3 className={s.UiSettingsOtherSectionTitle}>Backup</h3>
-        <div className={s.UiSettingsOtherCard}>
-          <div className={s.UiSettingsOtherRow}>
-            <span className={s.UiSettingsOtherRowLabel}>Create backup</span>
-            <button
-              type="button"
-              className={s.UiSettingsOtherLink}
-              disabled={backupBusy}
-              onClick={() => void handleCreateBackup()}
-            >
-              {backupBusy ? "Creating..." : "Save to file"}
-            </button>
-          </div>
-          <div className={s.UiSettingsOtherRow}>
-            <span className={s.UiSettingsOtherRowLabel}>Restore from backup</span>
-            <button
-              type="button"
-              className={s.UiSettingsOtherLink}
-              onClick={() => setRestoreModalOpen(true)}
-            >
-              Choose file
-            </button>
-          </div>
-        </div>
-        <p className={s.UiSettingsOtherHint}>
-          Create a full backup of your OpenClaw configuration or restore from a previously saved
-          backup.
-        </p>
-      </section>
-
-      <RestoreBackupModal
-        open={restoreModalOpen}
-        onClose={() => setRestoreModalOpen(false)}
-        onRestored={handleRestored}
-      />
-
-      {/* Terminal */}
-      <section className={s.UiSettingsOtherSection}>
-        <h3 className={s.UiSettingsOtherSectionTitle}>Terminal</h3>
-        <div className={s.UiSettingsOtherCard}>
-          <div className={s.UiSettingsOtherRow}>
-            <span className={s.UiSettingsOtherRowLabel}>Show in sidebar</span>
-            <span className={s.UiSettingsOtherAppRowValue}>
-              <label className={s.UiSettingsOtherToggle} aria-label="Show terminal in sidebar">
-                <input
-                  type="checkbox"
-                  checked={terminalSidebar}
-                  onChange={(e) => setTerminalSidebar(e.target.checked)}
-                />
-                <span className={s.UiSettingsOtherToggleTrack}>
-                  <span className={s.UiSettingsOtherToggleThumb} />
-                </span>
-              </label>
-            </span>
-          </div>
-          <div className={s.UiSettingsOtherRow}>
-            <NavLink to={routes.terminal} className={s.UiSettingsOtherLink}>
-              Open Terminal
-            </NavLink>
-          </div>
-        </div>
-        <p className={s.UiSettingsOtherHint}>
-          Built-in terminal with openclaw and bundled tools in PATH.
-        </p>
-      </section>
-
       {/* App & About (combined) */}
       <section className={s.UiSettingsOtherSection}>
         <h3 className={s.UiSettingsOtherSectionTitle}>App</h3>
@@ -264,7 +165,7 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
           </div>
           <div className={s.UiSettingsOtherRow}>
             <NavLink to={routes.legacy} className={s.UiSettingsOtherLink}>
-              Legacy
+              Legacy UI Dashboard
             </NavLink>
           </div>
         </div>
@@ -308,6 +209,105 @@ export function OtherTab({ onError }: { onError: (msg: string | null) => void })
             Discord
           </button>
         </div>
+      </section>
+
+      {/* Backup */}
+      <section className={s.UiSettingsOtherSection}>
+        <h3 className={s.UiSettingsOtherSectionTitle}>Backup</h3>
+        <div className={s.UiSettingsOtherCard}>
+          <div className={s.UiSettingsOtherRow}>
+            <span className={s.UiSettingsOtherRowLabel}>Create backup</span>
+            <button
+              type="button"
+              className={s.UiSettingsOtherLink}
+              disabled={backupBusy}
+              onClick={() => void handleCreateBackup()}
+            >
+              {backupBusy ? "Creating..." : "Save to file"}
+            </button>
+          </div>
+          <div className={s.UiSettingsOtherRow}>
+            <span className={s.UiSettingsOtherRowLabel}>Restore from backup</span>
+            <button
+              type="button"
+              className={s.UiSettingsOtherLink}
+              onClick={() => setRestoreModalOpen(true)}
+            >
+              Choose file
+            </button>
+          </div>
+        </div>
+        <p className={s.UiSettingsOtherHint}>
+          Create a full backup of your OpenClaw configuration or restore from a previously saved
+          backup.
+        </p>
+      </section>
+
+      <RestoreBackupModal
+        open={restoreModalOpen}
+        onClose={() => setRestoreModalOpen(false)}
+        onRestored={handleRestored}
+      />
+
+      {/* Folders: OpenClaw data + Agent workspace */}
+      <section className={s.UiSettingsOtherSection}>
+        <h3 className={s.UiSettingsOtherSectionTitle}>Folders</h3>
+        <div className={s.UiSettingsOtherCard}>
+          <div className={s.UiSettingsOtherRow}>
+            <span className={s.UiSettingsOtherRowLabel}>OpenClaw folder</span>
+            <button
+              type="button"
+              className={s.UiSettingsOtherLink}
+              onClick={() => void api?.openOpenclawFolder()}
+            >
+              Open folder
+            </button>
+          </div>
+          <div className={s.UiSettingsOtherRow}>
+            <span className={s.UiSettingsOtherRowLabel}>Agent workspace</span>
+            <button
+              type="button"
+              className={s.UiSettingsOtherLink}
+              onClick={() => void api?.openWorkspaceFolder()}
+            >
+              Open folder
+            </button>
+          </div>
+        </div>
+        <p className={s.UiSettingsOtherHint}>
+          Contains your local OpenClaw state and app data. Workspace contains editable .md files
+          (AGENTS, SOUL, USER, IDENTITY, TOOLS, HEARTBEAT, BOOTSTRAP) that shape the agent.
+        </p>
+      </section>
+
+      {/* Terminal */}
+      <section className={s.UiSettingsOtherSection}>
+        <h3 className={s.UiSettingsOtherSectionTitle}>Terminal</h3>
+        <div className={s.UiSettingsOtherCard}>
+          <div className={s.UiSettingsOtherRow}>
+            <span className={s.UiSettingsOtherRowLabel}>Show in sidebar</span>
+            <span className={s.UiSettingsOtherAppRowValue}>
+              <label className={s.UiSettingsOtherToggle} aria-label="Show terminal in sidebar">
+                <input
+                  type="checkbox"
+                  checked={terminalSidebar}
+                  onChange={(e) => setTerminalSidebar(e.target.checked)}
+                />
+                <span className={s.UiSettingsOtherToggleTrack}>
+                  <span className={s.UiSettingsOtherToggleThumb} />
+                </span>
+              </label>
+            </span>
+          </div>
+          <div className={s.UiSettingsOtherRow}>
+            <NavLink to={routes.terminal} className={s.UiSettingsOtherLink}>
+              Open Terminal
+            </NavLink>
+          </div>
+        </div>
+        <p className={s.UiSettingsOtherHint}>
+          Built-in terminal with openclaw and bundled tools in PATH.
+        </p>
       </section>
 
       {/* Danger zone (reset) */}
